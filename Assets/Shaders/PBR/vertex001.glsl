@@ -16,6 +16,6 @@ uniform mat4 model;
 void main() {
     gl_Position = viewProjection*model*vec4(aPos, 1.0);
     TexCoord = aTexCoord;
-    pos = aPos;
+    pos =(model *vec4( aPos,1.f)).xyz;
     TBN = mat3(aTangent, aBitangent, aNormal);
 }
