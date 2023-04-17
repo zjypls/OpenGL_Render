@@ -18,7 +18,7 @@ extern "C"{
 namespace Z{
 	class Model {
 	public:
-		explicit Model(const std::string& path,const glm::vec3&position=glm::vec3{0.f});
+		explicit Model(const std::string& path,const glm::vec3&position=glm::vec3{0.f},int index=0);
 		~Model();
 		glm::vec3& GetOffset() { return offset; }
 		glm::vec3& GetRotate() { return rotate; }
@@ -38,6 +38,7 @@ namespace Z{
 		void ProcessMesh(aiMesh* mesh, const aiScene* scene);
 		glm::vec3 offset{},rotate{},scale{};
 		glm::mat4 modelMatrix{1.f};
+		int Index = 0;
 		std::vector<std::shared_ptr<VertexArray>> vertexes;
 		std::vector<std::shared_ptr<Texture>> textures;
 	};

@@ -38,6 +38,8 @@ namespace Z {
 		static void SwapBuffers() { glfwSwapBuffers(window);glfwPollEvents(); }
 
 		static void SetClearValue(const vec4&value) { glClearColor(value.x,value.y,value.z,value.w); glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT); }
+
+		static glm::vec2 GetWindowSize();
 	};
 
 }

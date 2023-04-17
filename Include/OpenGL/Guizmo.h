@@ -9,7 +9,7 @@ namespace Z {
 	class Guizmo {
 	public:
 		static void CheckOperation();
-		static void DrawGuizmo(glm::mat4 &cameraView, glm::mat4 &cameraProjection, glm::mat4 &transform);
+		static void DrawGuizmo(glm::mat4 &cameraView, glm::mat4 &cameraProjection, glm::mat4 &transform,ImVec2 pos,ImVec2 size);
 	};
 
 }

@@ -92,4 +92,10 @@ namespace Z {
 		}
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
+
+	void FrameBuffer::BindAttachment() {
+		for(int i = 0; i < attachments.size(); ++i){
+			glBindTextureUnit(i, attachments[i].id);
+		}
+	}
 }

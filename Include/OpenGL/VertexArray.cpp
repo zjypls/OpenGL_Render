@@ -11,8 +11,8 @@ namespace Z {
 		uint32_t offset = 0;
 		for (auto &element: this->elements) {
 			element.offset = offset;
-			offset += element.size*element.count;
-			stride += element.size*element.count;
+			offset += element.size * element.count;
+			stride += element.size * element.count;
 		}
 	}
 
@@ -44,14 +44,19 @@ namespace Z {
 		int index = 0;
 		for (const auto &element: layout.GetElements()) {
 			glEnableVertexAttribArray(index);
-			glVertexAttribPointer(index, element.count, element.type, element.normalized, layout.GetStride(),
-								  (const void *) element.offset);
+			if (element.type == GL_FLOAT) {
+				glVertexAttribPointer(index, element.count, element.type, element.normalized, layout.GetStride(),
+				                      (const void *) element.offset);
+			} else if (element.type == GL_INT) {
+				glVertexAttribIPointer(index, element.count, element.type, layout.GetStride(),
+				                       (const void *) element.offset);
+			}
 			index++;
+			vertexBuffers.push_back(vb);
 		}
-		vertexBuffers.push_back(vb);
 	}
 
-	void VertexArray::Draw()const {
+	void VertexArray::Draw() const {
 		Bind();
 		glDrawElements(GL_TRIANGLES, indexBuffer->GetCount(), GL_UNSIGNED_INT, nullptr);
 	}

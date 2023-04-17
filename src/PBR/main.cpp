@@ -37,6 +37,11 @@ struct LightData {
 	glm::vec4 cameraPos;
 	glm::vec4 lightPos[5], lightCol[5];
 };
+glm::vec2 viewportSize{800, 600};
+
+ImVec2 operator-(const ImVec2& a, const ImVec2& b) {
+	return {a.x - b.x, a.y - b.y};
+}
 
 int main() {
 	camera.Front = camera.focus - camera.position;
@@ -60,7 +65,7 @@ int main() {
 	glfwSetCursorPosCallback(window, [](GLFWwindow *w, double x, double y) {
 		camera.Turn(w, x, y);
 	});
-	glfwSetFramebufferSizeCallback(window, Z::Camera::ReSize);
+	//glfwSetFramebufferSizeCallback(window, Z::Camera::ReSize);
 	Z::MyImGui::Init();
 
 	auto vb = std::make_shared<Z::VertexBuffer>(quad, sizeof(quad));
@@ -85,12 +90,14 @@ int main() {
 	attachments.width = 800;
 	attachments.height = 600;
 	attachments.attachments.push_back({GL_RGBA8, GL_COLOR_ATTACHMENT0});
+	auto viewFrame= Z::FrameBuffer(attachments);
 	attachments.attachments.push_back({GL_RGB16, GL_COLOR_ATTACHMENT1});
 	attachments.attachments.push_back({GL_RGB32F, GL_COLOR_ATTACHMENT2});
 	attachments.attachments.push_back({GL_R16F, GL_COLOR_ATTACHMENT3});
 	attachments.attachments.push_back({GL_R16F, GL_COLOR_ATTACHMENT4});
 	attachments.attachments.push_back({GL_R16F, GL_COLOR_ATTACHMENT5});
 	attachments.attachments.push_back({GL_R16F, GL_COLOR_ATTACHMENT6});
+	attachments.attachments.push_back({GL_RG32I, GL_COLOR_ATTACHMENT7});
 	attachments.attachments.push_back({GL_DEPTH24_STENCIL8, GL_DEPTH_STENCIL_ATTACHMENT});
 	auto fb = Z::FrameBuffer(attachments);
 
@@ -101,9 +108,32 @@ int main() {
 
 	glEnable(GL_DEPTH_TEST);
 	auto walkControl = std::thread{Z::Camera::Walk, window};
+	static bool viewPortHovered = false, viewPortFocused = false;
+	static ImVec2 CursorPos{};
+	static glm::ivec2 Index{};
 	while (Z::Renderer::Running()) {
-		Z::MyImGui::Begin();
 		Z::Timer::Update();
+		Z::MyImGui::Begin();
+		{
+			ImGuiViewport *viewport = ImGui::GetMainViewport();
+			ImGui::SetNextWindowPos(viewport->Pos);
+			ImGui::SetNextWindowSize(viewport->Size);
+			ImGui::SetNextWindowViewport(viewport->ID);
+			ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+			ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+			ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+			ImGui::Begin("DockSpace Demo", nullptr,
+			             ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoBackground |
+			             ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus |
+			             ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize |
+			             ImGuiWindowFlags_NoMove);
+			//ImGui::PopStyleVar(2);
+			ImGui::DockSpace(ImGui::GetID("MyDockSpace"));
+		}
+
+
+
+
 		auto vp = camera.GetVPMatrix();
 		ubo.SetData(&vp, sizeof(glm::mat4));
 		ubo.Bind(7);
@@ -112,16 +142,40 @@ int main() {
 		fbo.Bind(12);
 		fb.Bind();
 		Z::Renderer::SetClearValue({0.2f, 0.3f, 0.3f, 1.0f});
+		fb.ClearAttachment(7,glm::ivec2{-1,-1});
 		Z::Renderer::Draw(model, lighter);
-		fb.Unbind();
-
+		if(viewPortFocused&&viewPortHovered&&ImGui::IsMouseClicked(ImGuiMouseButton_Middle)){
+			CursorPos = ImGui::GetMousePos()-ImGui::GetWindowPos();
+			CursorPos.y = viewportSize.y - CursorPos.y;
+			Index = fb.ReadPixel<glm::ivec2>(7, CursorPos.x, CursorPos.y);
+		}
+		viewFrame.Bind();
 		Z::Renderer::SetClearValue({0.f, 0.f, 0.f, 1.0f});
 		sample.Bind();
-		for (int i = 0; i < 7; i++)
-			glBindTextureUnit(i, fb.GetAttachment(i));
+		fb.BindAttachment();
 		//Todo: change to Z::Renderer::Draw(va, sample);
 		//Todo: change view to imgui::image
 		va.Draw();
+		viewFrame.Unbind();
+
+		ImGui::Begin("##View", nullptr, ImGuiWindowFlags_NoTitleBar|ImGuiWindowFlags_NoScrollbar);
+		ImGui::Image((void *) viewFrame.GetAttachment(0), ImVec2(viewportSize.x, viewportSize.y), ImVec2(0, 1), ImVec2(1, 0));
+		viewPortHovered = ImGui::IsWindowHovered();
+		viewPortFocused = ImGui::IsWindowFocused();
+		auto viewSize=ImGui::GetWindowSize();
+		if(viewSize.x!=viewportSize.x||viewSize.y!=viewportSize.y){
+			viewportSize= glm::vec2{viewSize.x,viewSize.y};
+			attachments.width=viewportSize.x;
+			attachments.height=viewportSize.y;
+			viewFrame.Resize(viewportSize.x,viewportSize.y);
+			fb.Resize(viewportSize.x,viewportSize.y);
+			camera.aspect=viewportSize.x/viewportSize.y;
+			camera.CalculateMatrix();
+		}
+		Z::Guizmo::DrawGuizmo(camera.viewMatrix, camera.projectionMatrix, model.GetModelMatrix(),ImGui::GetWindowPos(), ImGui::GetWindowSize());
+		ImGui::PopStyleVar(3);
+
+		ImGui::End();
 
 		ImGui::Begin("Status");
 		static float frame = 1 / Z::Timer::GetDeltaTime();
@@ -132,21 +186,19 @@ int main() {
 		static int lightIndex = 0;
 		ImGui::Text("FPS: %.2f", frame);
 		ImGui::Text("CameraPos: %.2f, %.2f, %.2f", camera.position.x, camera.position.y, camera.position.z);
+		ImGui::Text("Index: %d, %d", Index.x, Index.y);
+		ImGui::Text("CursorPos: %.2f, %.2f", CursorPos.x, CursorPos.y);
 		ImGui::Combo("Light", &lightIndex, "Light0\0Light1\0Light2\0Light3\0Light4\0");
 		ImGui::DragFloat4("LightPos", &lightData.lightPos[lightIndex][0]);
 		ImGui::DragFloat4("LightCol", &lightData.lightCol[lightIndex][0]);
 
 		ImGui::End();
 
-		Z::Guizmo::DrawGuizmo(camera.viewMatrix,camera.projectionMatrix,model.GetModelMatrix());
 
+		ImGui::End();
 		Z::MyImGui::End();
 
 		Z::Renderer::SwapBuffers();
-		if (camera.Resize) {
-			camera.Resize = false;
-			fb.Resize(camera.width, camera.height);
-		}
 	}
 	if (walkControl.joinable())
 		walkControl.join();

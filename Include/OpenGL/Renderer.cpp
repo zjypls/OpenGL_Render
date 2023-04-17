@@ -34,4 +34,10 @@ namespace Z {
 		glfwSwapInterval(spec.vsync);
 	}
 
+	glm::vec2 Renderer::GetWindowSize() {
+		int width, height;
+		glfwGetWindowSize(window, &width, &height);
+		return glm::vec2(width, height);
+	}
+
 }
