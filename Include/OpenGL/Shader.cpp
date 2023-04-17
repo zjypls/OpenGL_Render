@@ -7,10 +7,10 @@
 #include "Shader.h"
 
 namespace Z {
-
+	std::filesystem::path ShaderPath{Z_SHADER_PATH};
 	namespace Temp{
-		std::string ReadFile(std::filesystem::path path){
-			std::ifstream stream(path,std::ios::in|std::ios::binary|std::ios::ate);
+		std::string ReadFile(const std::filesystem::path& path){
+			std::ifstream stream(ShaderPath/path,std::ios::in|std::ios::binary|std::ios::ate);
 			assert(stream.is_open());
 			auto size=stream.tellg();
 			std::string result(size,' ');

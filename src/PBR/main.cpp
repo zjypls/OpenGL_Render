@@ -71,11 +71,11 @@ int main() {
 	va.SetIndexBuffer(ib);
 
 	Z::Shader lighter{}, sample{};
-	lighter.AddShader("../Shaders/vertex001.glsl", GL_VERTEX_SHADER);
-	lighter.AddShader("../Shaders/fragment001.glsl", GL_FRAGMENT_SHADER);
+	lighter.AddShader("vertex001.glsl", GL_VERTEX_SHADER);
+	lighter.AddShader("fragment001.glsl", GL_FRAGMENT_SHADER);
 	lighter.Link();
-	sample.AddShader("../Shaders/vertex002.glsl", GL_VERTEX_SHADER);
-	sample.AddShader("../Shaders/fragment002.glsl", GL_FRAGMENT_SHADER);
+	sample.AddShader("vertex002.glsl", GL_VERTEX_SHADER);
+	sample.AddShader("fragment002.glsl", GL_FRAGMENT_SHADER);
 	sample.Link();
 
 	Z::UniformBuffer ubo{sizeof(glm::mat4)}, fbo{&lightData, sizeof(LightData)};
