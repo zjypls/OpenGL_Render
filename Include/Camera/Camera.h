@@ -16,8 +16,8 @@ namespace Z {
 		glm::vec3 Right,Up=glm::vec3(0,1,0),Front=glm::vec3(-1,-1,-1);
 		bool Resize=false;
 		unsigned int width=800,height=600;
-		glm::mat4 vpMatrix=glm::perspective(glm::radians(fov), aspect, near, far)*
-			glm::lookAt(position, focus, glm::vec3(0, 1, 0));
+		glm::mat4 viewMatrix=glm::lookAt(position, focus, glm::vec3(0, 1, 0));
+		glm::mat4 projectionMatrix=glm::perspective(glm::radians(fov), aspect, near, far);
 
 		static void Walk(GLFWwindow*);
 		void Turn(GLFWwindow*,double x,double y);

@@ -1,5 +1,4 @@
 #include "OpenGL/Renderer.h"
-#include "OpenGL/Texture.h"
 #include "OpenGL/FrameBuffer.h"
 #include "OpenGL/Shader.h"
 #include "OpenGL/VertexArray.h"
@@ -8,13 +7,14 @@
 #include "OpenGL/UniformBuffer.h"
 #include "OpenGL/Timer.h"
 #include "OpenGL/MyImGui.h"
-#include <Windows.h>
+#include "OpenGL/Guizmo.h"
 #include <thread>
 #include <iostream>
 
 extern "C"
 {
-__declspec(dllexport) DWORD NvOptimusEnablement = 0x00000001;
+__declspec(dllexport) unsigned long NvOptimusEnablement = 0x00000001;
+//__declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
 }
 
 const float quad[20]{
@@ -39,10 +39,12 @@ struct LightData {
 };
 
 int main() {
+	camera.Front = camera.focus - camera.position;
+	camera.Right = glm::normalize(glm::cross(camera.Front, glm::vec3(0, 1, 0)));
 	LightData lightData{
-			{1.5,               -1.3,              0.6,              0},
-			{{1,  1,  0, 0}, {-10, -10, 10, 0}, {-10, 10, -10, 0}, {-10, -10, 10, 0}, {10,  -10, 10,  0}},
-			{{17, 17, 17,  1}, {0,  0, 0, 1}, {0,  0, 0, 1}, {0,  0,  0, 1}, {0, 0, 0, 1}}};
+			{1.5,             -1.3,              0.6,               0},
+			{{1,  1,  0,  0}, {-10, -10, 10, 0}, {-10, 10, -10, 0}, {-10, -10, 10, 0}, {10, -10, 10, 0}},
+			{{17, 17, 17, 1}, {0,   0,   0,  1}, {0,   0,  0,   1}, {0,   0,   0,  1}, {0,  0,   0,  1}}};
 	Z::RenderSpec spec;
 	spec.width = 800;
 	spec.height = 600;
@@ -92,6 +94,9 @@ int main() {
 	attachments.attachments.push_back({GL_DEPTH24_STENCIL8, GL_DEPTH_STENCIL_ATTACHMENT});
 	auto fb = Z::FrameBuffer(attachments);
 
+	std::vector<std::shared_ptr<Z::Model>> models;
+	models.emplace_back(std::make_shared<Z::Model>("lighter/lighter.fbx"));
+	//Todo: change to models.emplace_back(std::make_shared<Z::Model>("lighter/lighter.fbx"));
 	Z::Model model{"lighter/lighter.fbx"};
 
 	glEnable(GL_DEPTH_TEST);
@@ -114,7 +119,8 @@ int main() {
 		sample.Bind();
 		for (int i = 0; i < 7; i++)
 			glBindTextureUnit(i, fb.GetAttachment(i));
-
+		//Todo: change to Z::Renderer::Draw(va, sample);
+		//Todo: change view to imgui::image
 		va.Draw();
 
 		ImGui::Begin("Status");
@@ -131,6 +137,9 @@ int main() {
 		ImGui::DragFloat4("LightCol", &lightData.lightCol[lightIndex][0]);
 
 		ImGui::End();
+
+		Z::Guizmo::DrawGuizmo(camera.viewMatrix,camera.projectionMatrix,model.GetModelMatrix());
+
 		Z::MyImGui::End();
 
 		Z::Renderer::SwapBuffers();

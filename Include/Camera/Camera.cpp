@@ -27,8 +27,8 @@ namespace Z {
 			} else if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) {
 				vec += glm::vec3(0, -1, 0);
 			}
-			if(vec!=glm::vec3(0,0,0)){
-				vec *= Timer::GetDeltaTime() * 1E-4;
+			if (vec != glm::vec3(0, 0, 0)) {
+				vec *= Timer::GetDeltaTime() * 5E-4;
 				camera->position += vec;
 				camera->focus += vec;
 				camera->CalculateMatrix();
@@ -39,7 +39,7 @@ namespace Z {
 	void Camera::Turn(GLFWwindow *window, double x, double y) {
 		float dx = x - lastX;
 		float dy = y - lastY;
-		//ToDo:change button 4 to LEFT
+		//ToDo:change button 4 toRight
 		if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_4) == GLFW_PRESS) {
 			Front = focus - position;
 			Right = glm::normalize(glm::cross(Front, glm::vec3(0, 1, 0)));
@@ -47,10 +47,10 @@ namespace Z {
 			glm::mat4 mat = glm::mat4(1);
 			mat = glm::rotate(mat, glm::radians(-dx), up);
 			mat = glm::rotate(mat, glm::radians(-dy), Right);
-			Front =glm::normalize( glm::vec3(mat * glm::vec4(Front, 1)));
+			Front = glm::normalize(glm::vec3(mat * glm::vec4(Front, 1)));
 			position = focus - Front * distance;
 			CalculateMatrix();
-		} else if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS) {
+		} else if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS) {//Todo:move to scroll event
 			distance += dy * Timer::GetDeltaTime();
 			glm::vec3 vec = glm::normalize(Front);
 			position = focus - vec * distance;
@@ -61,12 +61,12 @@ namespace Z {
 	}
 
 	glm::mat4 Camera::GetVPMatrix() const {
-		return vpMatrix;
+		return projectionMatrix * viewMatrix;
 	}
 
-	void Camera::ReSize(GLFWwindow * window, int width, int height) {
+	void Camera::ReSize(GLFWwindow *window, int width, int height) {
 		auto camera = (Camera *) glfwGetWindowUserPointer(window);
-		camera->aspect = (float)width / height;
+		camera->aspect = (float) width / height;
 		glViewport(0, 0, width, height);
 		camera->Resize = true;
 		camera->width = width;
@@ -75,8 +75,8 @@ namespace Z {
 	}
 
 	void Camera::CalculateMatrix() {
-		vpMatrix = glm::perspective(glm::radians(fov), aspect, near, far)*
-			glm::lookAt(position, focus, glm::vec3(0, 1, 0));
+		projectionMatrix = glm::perspective(glm::radians(fov), aspect, near, far);
+		viewMatrix = glm::lookAt(position, focus, glm::vec3(0, 1, 0));
 	}
 
 }

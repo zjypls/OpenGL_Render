@@ -20,7 +20,10 @@ namespace Z{
 	public:
 		explicit Model(const std::string& path,const glm::vec3&position=glm::vec3{0.f});
 		~Model();
-		glm::vec3 GetOffset() const { return offset; }
+		glm::vec3& GetOffset() { return offset; }
+		glm::vec3& GetRotate() { return rotate; }
+		glm::vec3& GetScale() { return scale; }
+		glm::mat4& GetModelMatrix() { return modelMatrix; }
 		auto begin()const { return vertexes.begin(); }
 		auto end()const { return vertexes.end(); }
 		auto size()const { return vertexes.size(); }
@@ -28,12 +31,13 @@ namespace Z{
 		auto end() { return vertexes.end(); }
 		void Draw(Shader&shader) const;
 	private:
-		void LoadTexture(std::filesystem::path path);
+		void LoadTexture(const std::filesystem::path& path);
 		static std::filesystem::path modelRootPath;
 		void LoadModel(const std::string& path);
 		void ProcessNode(aiNode* node, const aiScene* scene);
 		void ProcessMesh(aiMesh* mesh, const aiScene* scene);
-		glm::vec3 offset;
+		glm::vec3 offset{},rotate{},scale{};
+		glm::mat4 modelMatrix{1.f};
 		std::vector<std::shared_ptr<VertexArray>> vertexes;
 		std::vector<std::shared_ptr<Texture>> textures;
 	};

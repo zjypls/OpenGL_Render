@@ -105,6 +105,7 @@ namespace Z{
 
 	void Model::Draw(Shader&shader) const {
 		shader.Bind();
+		shader.SetUniform("model",&modelMatrix[0][0]);
 		for(int i=0;i<textures.size();i++){
 			textures[i]->Bind(i);
 		}
@@ -113,7 +114,7 @@ namespace Z{
 		}
 	}
 
-	void Model::LoadTexture(std::filesystem::path path) {
+	void Model::LoadTexture(const std::filesystem::path& path) {
 		auto texture = std::make_shared<Texture>(path.string());
 		textures.push_back(texture);
 	}

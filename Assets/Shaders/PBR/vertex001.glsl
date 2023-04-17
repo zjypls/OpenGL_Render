@@ -11,10 +11,10 @@ layout(location=2)out mat3 TBN;
 layout(std140, binding=7) uniform Matrices {
     mat4 viewProjection;
 };
-
+uniform mat4 model;
 
 void main() {
-    gl_Position = viewProjection*vec4(aPos, 1.0);
+    gl_Position = viewProjection*model*vec4(aPos, 1.0);
     TexCoord = aTexCoord;
     pos = aPos;
     TBN = mat3(aTangent, aBitangent, aNormal);

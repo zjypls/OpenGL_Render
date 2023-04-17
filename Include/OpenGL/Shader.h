@@ -28,6 +28,8 @@ namespace Z {
 			glUseProgram(0);
 		}
 
+		void SetUniform(const std::string&name,const float* matrix);
+
 	private:
 		uint32_t id;
 	};

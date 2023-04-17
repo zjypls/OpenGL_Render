@@ -14,3 +14,6 @@
 [submodule "Include/assimp"]
 	path = Include/assimp
 	url = https://github.com/zjypls/assimp.git
+[submodule "Include/ImGuizmo"]
+	path = Include/ImGuizmo
+	url = https://github.com/CedricGuillemet/ImGuizmo.git

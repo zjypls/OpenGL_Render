@@ -46,4 +46,9 @@ namespace Z {
 		glDeleteShader(shader);
 	}
 
+	void Shader::SetUniform(const std::string &name,const float* matrix) {
+		auto location=glGetUniformLocation(id,name.c_str());
+		glUniformMatrix4fv(location,1,GL_FALSE,matrix);
+	}
+
 }
