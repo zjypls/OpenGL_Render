@@ -10,6 +10,7 @@
 [submodule "Include/imgui"]
 	path = Include/imgui
 	url = https://github.com/zjypls/imgui.git
+
 [submodule "Include/assimp"]
 	path = Include/assimp
-	url = https://github.com/assimp/assimp.git
+	url = https://github.com/zjypls/assimp.git
