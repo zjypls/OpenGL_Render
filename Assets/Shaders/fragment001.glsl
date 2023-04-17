@@ -2,10 +2,10 @@
 layout(location = 0)out vec4 BaseColor;
 layout(location = 1)out vec3 Normal;
 layout(location = 2)out vec3 wPos;
-layout(location = 3)out vec4 Roughness;
-layout(location = 4)out vec4 Metallic;
-layout(location = 5)out vec4 AO;
-layout(location =  6)out float Depth;
+layout(location = 3)out float Roughness;
+layout(location = 4)out float Metallic;
+layout(location = 5)out float AO;
+layout(location = 6)out float Depth;
 
 layout(binding = 0)uniform sampler2D AOTex;
 layout(binding = 1)uniform sampler2D Base;
@@ -21,13 +21,10 @@ layout(location = 2) in mat3 TBN;
 
 void main() {
     BaseColor = texture(Base, aTex);
-    Normal =texture(NormalTex, aTex).rgb;
+    Normal =TBN*(texture(NormalTex, aTex).rgb*2-1);
     wPos = pos;
-    Roughness.rgb = TBN[0];
-    Metallic.rgb = TBN[1];
-    AO.rgb = TBN[2];
-    Roughness.a = texture(RoughnessTex, aTex).r;
-    Metallic.a = texture(MetallicTex, aTex).r;
-    AO.a = texture(AOTex, aTex).r;
+    Roughness = texture(RoughnessTex, aTex).r;
+    Metallic = texture(MetallicTex, aTex).r;
+    AO = texture(AOTex, aTex).r;
     Depth = texture(DepthTex, aTex).r;
 }

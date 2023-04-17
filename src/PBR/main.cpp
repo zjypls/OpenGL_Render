@@ -29,7 +29,7 @@ const uint32_t indices[6]{
 };
 
 Z::Camera camera{
-		{2, 2, 2},
+		{1.5, -1.3, .6},
 		{0, 0, 0},
 		45.f, 8.f / 6.f, 0.1f, 100.f, glm::sqrt(12.f), 0, 0
 };
@@ -40,9 +40,9 @@ struct LightData {
 
 int main() {
 	LightData lightData{
-			{2,               2,              2,              0},
-			{{3,  3,  -3, 0}, {-10, -10, 10, 0}, {-10, 10, -10, 0}, {-10, -10, 10, 0}, {10,  -10, 10,  0}},
-			{{10, 10, 10,  1}, {0,  0, 0, 1}, {0,  0, 0, 1}, {0,  0,  0, 1}, {0, 0, 0, 1}}};
+			{1.5,               -1.3,              0.6,              0},
+			{{1,  1,  0, 0}, {-10, -10, 10, 0}, {-10, 10, -10, 0}, {-10, -10, 10, 0}, {10,  -10, 10,  0}},
+			{{17, 17, 17,  1}, {0,  0, 0, 1}, {0,  0, 0, 1}, {0,  0,  0, 1}, {0, 0, 0, 1}}};
 	Z::RenderSpec spec;
 	spec.width = 800;
 	spec.height = 600;
@@ -85,9 +85,9 @@ int main() {
 	attachments.attachments.push_back({GL_RGBA8, GL_COLOR_ATTACHMENT0});
 	attachments.attachments.push_back({GL_RGB16, GL_COLOR_ATTACHMENT1});
 	attachments.attachments.push_back({GL_RGB32F, GL_COLOR_ATTACHMENT2});
-	attachments.attachments.push_back({GL_RGBA16F, GL_COLOR_ATTACHMENT3});
-	attachments.attachments.push_back({GL_RGBA16F, GL_COLOR_ATTACHMENT4});
-	attachments.attachments.push_back({GL_RGBA16F, GL_COLOR_ATTACHMENT5});
+	attachments.attachments.push_back({GL_R16F, GL_COLOR_ATTACHMENT3});
+	attachments.attachments.push_back({GL_R16F, GL_COLOR_ATTACHMENT4});
+	attachments.attachments.push_back({GL_R16F, GL_COLOR_ATTACHMENT5});
 	attachments.attachments.push_back({GL_R16F, GL_COLOR_ATTACHMENT6});
 	attachments.attachments.push_back({GL_DEPTH24_STENCIL8, GL_DEPTH_STENCIL_ATTACHMENT});
 	auto fb = Z::FrameBuffer(attachments);

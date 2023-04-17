@@ -60,16 +60,12 @@ vec3 Frenel(vec3 F0, float costa) {
 
 void main() {
     vec3 base=pow(texture(Base, tex).rgb,vec3(2.2f));
-    vec4 T=texture(Roughness, tex);
-    vec4 B=texture(Metallic, tex);
-    vec4 N=texture(AO, tex);
-    float roughness=T.a;
-    float metallic=B.a;
-    float ao=N.a;
-    mat3 TBN=(mat3(T.xyz, B.xyz, N.xyz));
-    vec3 normal=TBN*texture(Normal, tex).rgb*2-1;
-    vec3 wpos=(texture(Wpos, tex).rgb);
-    vec3 viewDir = normalize((cameraPos - wpos));
+    float roughness=texture(Roughness,tex).r;
+    float metallic = texture(Metallic,tex).r;
+    float ao=texture(AO,tex).r;
+    vec3 normal=texture(Normal, tex).rgb;
+    vec3 wpos=texture(Wpos, tex).rgb;
+    vec3 viewDir = normalize(cameraPos - wpos);
 
     vec3 F0 = vec3(0.04);
     F0 = mix(F0, base, metallic);
