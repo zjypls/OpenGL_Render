@@ -1,0 +1,15 @@
+[submodule "Include/glfw"]
+	path = Include/glfw
+	url = https://github.com/zjypls/glfw.git
+[submodule "Include/glm"]
+	path = Include/glm
+	url = https://github.com/g-truc/glm.git
+[submodule "Include/stb"]
+	path = Include/stb
+	url = https://github.com/nothings/stb.git
+[submodule "Include/imgui"]
+	path = Include/imgui
+	url = https://github.com/zjypls/imgui.git
+[submodule "Include/assimp"]
+	path = Include/assimp
+	url = https://github.com/assimp/assimp.git

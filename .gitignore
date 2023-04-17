@@ -1,0 +1,9 @@
+.idea
+Bin/*.exe
+Bin/*.pdb
+Bin/*.ilk
+Bin/*.lib
+Bin/*.dll
+Lib
+cmake-build-debug
+cmake-build-release
