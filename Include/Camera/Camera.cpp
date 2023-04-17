@@ -27,9 +27,12 @@ namespace Z {
 			} else if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) {
 				vec += glm::vec3(0, -1, 0);
 			}
-			vec *= Timer::GetDeltaTime()*1E-4;
-			camera->position += vec;
-			camera->focus += vec;
+			if(vec!=glm::vec3(0,0,0)){
+				vec *= Timer::GetDeltaTime() * 1E-4;
+				camera->position += vec;
+				camera->focus += vec;
+				camera->CalculateMatrix();
+			}
 		}
 	}
 
@@ -46,19 +49,19 @@ namespace Z {
 			mat = glm::rotate(mat, glm::radians(-dy), Right);
 			Front =glm::normalize( glm::vec3(mat * glm::vec4(Front, 1)));
 			position = focus - Front * distance;
+			CalculateMatrix();
 		} else if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS) {
 			distance += dy * Timer::GetDeltaTime();
 			glm::vec3 vec = glm::normalize(Front);
 			position = focus - vec * distance;
+			CalculateMatrix();
 		}
 		lastX = x;
 		lastY = y;
 	}
 
 	glm::mat4 Camera::GetVPMatrix() const {
-		glm::mat4 view = glm::lookAt(position, focus, glm::vec3(0, 1, 0));
-		glm::mat4 projection = glm::perspective(glm::radians(fov), aspect, near, far);
-		return projection * view;
+		return vpMatrix;
 	}
 
 	void Camera::ReSize(GLFWwindow * window, int width, int height) {
@@ -68,6 +71,12 @@ namespace Z {
 		camera->Resize = true;
 		camera->width = width;
 		camera->height = height;
+		camera->CalculateMatrix();
+	}
+
+	void Camera::CalculateMatrix() {
+		vpMatrix = glm::perspective(glm::radians(fov), aspect, near, far)*
+			glm::lookAt(position, focus, glm::vec3(0, 1, 0));
 	}
 
 }

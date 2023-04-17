@@ -31,7 +31,7 @@ const uint32_t indices[6]{
 Z::Camera camera{
 		{1.5, -1.3, .6},
 		{0, 0, 0},
-		45.f, 8.f / 6.f, 0.1f, 100.f, glm::sqrt(12.f), 0, 0
+		45.f, 8.f / 6.f, 0.1f, 100.f, glm::sqrt(4.2f), 0, 0
 };
 struct LightData {
 	glm::vec4 cameraPos;

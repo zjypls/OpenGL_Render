@@ -6,6 +6,7 @@
 #define RENDERER003_OGL_CAMERA_H
 #include "glm/glm/glm.hpp"
 #include "GLFW/glfw3.h"
+#include "glm/glm/gtc/matrix_transform.hpp"
 namespace Z {
 	struct Camera {
 		glm::vec3 position,focus;
@@ -15,11 +16,14 @@ namespace Z {
 		glm::vec3 Right,Up=glm::vec3(0,1,0),Front=glm::vec3(-1,-1,-1);
 		bool Resize=false;
 		unsigned int width=800,height=600;
+		glm::mat4 vpMatrix=glm::perspective(glm::radians(fov), aspect, near, far)*
+			glm::lookAt(position, focus, glm::vec3(0, 1, 0));
 
 		static void Walk(GLFWwindow*);
 		void Turn(GLFWwindow*,double x,double y);
 		static void ReSize(GLFWwindow*,int width,int height);
 		glm::mat4 GetVPMatrix() const;
+		void CalculateMatrix();
 
 	};
 
