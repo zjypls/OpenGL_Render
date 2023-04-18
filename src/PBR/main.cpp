@@ -65,6 +65,9 @@ int main() {
 	glfwSetCursorPosCallback(window, [](GLFWwindow *w, double x, double y) {
 		camera.Turn(w, x, y);
 	});
+	glfwSetScrollCallback(window, [](GLFWwindow *w, double x, double y) {
+		camera.Scroll(w, x, y);
+	});
 	//glfwSetFramebufferSizeCallback(window, Z::Camera::ReSize);
 	Z::MyImGui::Init();
 
@@ -103,7 +106,6 @@ int main() {
 
 	std::vector<std::shared_ptr<Z::Model>> models;
 	models.emplace_back(std::make_shared<Z::Model>("lighter/lighter.fbx"));
-	//Todo: change to models.emplace_back(std::make_shared<Z::Model>("lighter/lighter.fbx"));
 	//Z::Model model{"lighter/lighter.fbx"};
 
 	glEnable(GL_DEPTH_TEST);
@@ -140,7 +142,7 @@ int main() {
 		fbo.SetData(&lightData, sizeof(LightData));
 		fbo.Bind(12);
 		fb.Bind();
-		Z::Renderer::SetClearValue({0.2f, 0.3f, 0.3f, 1.0f});
+		Z::Renderer::SetClearValue({0.1f, 0.1f, 0.1f, .0f});
 		fb.ClearAttachment(7, glm::ivec2{-1, -1});
 		for (auto &model: models) {
 			Z::Renderer::Draw(model, lighter);
@@ -155,7 +157,6 @@ int main() {
 		fb.BindAttachment();
 		sample.Bind();
 		//Todo: change to Z::Renderer::Draw(va, sample);
-		//Todo: change view to imgui::image
 		va.Draw();
 		viewFrame.Unbind();
 
@@ -197,6 +198,9 @@ int main() {
 		ImGui::Combo("Light", &lightIndex, "Light0\0Light1\0Light2\0Light3\0Light4\0");
 		ImGui::DragFloat4("LightPos", &lightData.lightPos[lightIndex][0], .1f);
 		ImGui::DragFloat4("LightCol", &lightData.lightCol[lightIndex][0], .1f);
+		ImGui::Text("Right Mouse Button to rotate camera");
+		ImGui::Text("Middle Mouse Button to pick model and show guizmo");
+		ImGui::Text("Scroll to change focus distance");
 
 		ImGui::End();
 

@@ -22,6 +22,7 @@ namespace Z {
 		static void Walk(GLFWwindow*);
 		void Turn(GLFWwindow*,double x,double y);
 		static void ReSize(GLFWwindow*,int width,int height);
+		void Scroll(GLFWwindow*,double x,double y);
 		glm::mat4 GetVPMatrix() const;
 		void CalculateMatrix();
 

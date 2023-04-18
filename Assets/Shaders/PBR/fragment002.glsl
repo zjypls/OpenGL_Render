@@ -17,12 +17,6 @@ layout(std140, binding=12)uniform Camera{
 };
 #define PI 3.1415926
 
-vec2 ParallaxMapping(vec2 texCoords, vec3 viewDir, float scale){
-    float height = 1 - texture(Depth, texCoords).r * 2;
-    vec2 p = viewDir.xy / viewDir.z * (height * scale);
-    return texCoords - p;
-}
-
 float DistributionGGX(vec3 N, vec3 H, float roughness){
     float a = roughness * roughness;
     float a2 = a * a;
@@ -59,13 +53,13 @@ vec3 Frenel(vec3 F0, float costa) {
 }
 
 void main() {
+    vec3 wpos=texture(Wpos, tex).rgb;
+    vec3 viewDir = normalize(cameraPos - wpos);
     vec3 base=pow(texture(Base, tex).rgb,vec3(2.2f));
     float roughness=texture(Roughness,tex).r;
     float metallic = texture(Metallic,tex).r;
     float ao=texture(AO,tex).r;
     vec3 normal=texture(Normal, tex).rgb;
-    vec3 wpos=texture(Wpos, tex).rgb;
-    vec3 viewDir = normalize(cameraPos - wpos);
 
     vec3 F0 = vec3(0.04);
     F0 = mix(F0, base, metallic);

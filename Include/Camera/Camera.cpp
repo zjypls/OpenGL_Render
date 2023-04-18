@@ -40,7 +40,7 @@ namespace Z {
 		float dx = x - lastX;
 		float dy = y - lastY;
 		//ToDo:change button 4 toRight
-		if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_4) == GLFW_PRESS) {
+		if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS) {
 			Front = focus - position;
 			Right = glm::normalize(glm::cross(Front, glm::vec3(0, 1, 0)));
 			glm::vec3 up = glm::cross(Right, Front);
@@ -49,11 +49,6 @@ namespace Z {
 			mat = glm::rotate(mat, glm::radians(-dy), Right);
 			Front = glm::normalize(glm::vec3(mat * glm::vec4(Front, 1)));
 			position = focus - Front * distance;
-			CalculateMatrix();
-		} else if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS) {//Todo:move to scroll event
-			distance += dy * Timer::GetDeltaTime();
-			glm::vec3 vec = glm::normalize(Front);
-			position = focus - vec * distance;
 			CalculateMatrix();
 		}
 		lastX = x;
@@ -77,6 +72,13 @@ namespace Z {
 	void Camera::CalculateMatrix() {
 		projectionMatrix = glm::perspective(glm::radians(fov), aspect, near, far);
 		viewMatrix = glm::lookAt(position, focus, glm::vec3(0, 1, 0));
+	}
+
+	void Camera::Scroll(GLFWwindow *, double x, double y) {
+		distance += y * Timer::GetDeltaTime()*20.f;
+		glm::vec3 vec = glm::normalize(Front);
+		position = focus - vec * distance;
+		CalculateMatrix();
 	}
 
 }
