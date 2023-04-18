@@ -37,6 +37,9 @@ struct LightData {
 	glm::vec4 cameraPos;
 	glm::vec4 lightPos[5], lightCol[5];
 };
+struct PostProcessData {
+	glm::vec2 viewportSize;
+};
 glm::vec2 viewportSize{800, 600};
 
 ImVec2 operator-(const ImVec2 &a, const ImVec2 &b) {
@@ -47,9 +50,10 @@ int main() {
 	camera.Front = camera.focus - camera.position;
 	camera.Right = glm::normalize(glm::cross(camera.Front, glm::vec3(0, 1, 0)));
 	LightData lightData{
-			{1.5,             -1.3,              0.6,               0},
+			{1.5,             -1.3,              0.6,               1.5},
 			{{1,  1,  0,  0}, {-10, -10, 10, 0}, {-10, 10, -10, 0}, {-10, -10, 10, 0}, {10, -10, 10, 0}},
 			{{17, 17, 17, 1}, {0,   0,   0,  1}, {0,   0,  0,   1}, {0,   0,   0,  1}, {0,  0,   0,  1}}};
+	PostProcessData postProcessData{{800, 600}};
 	Z::RenderSpec spec;
 	spec.width = 800;
 	spec.height = 600;
@@ -68,7 +72,6 @@ int main() {
 	glfwSetScrollCallback(window, [](GLFWwindow *w, double x, double y) {
 		camera.Scroll(w, x, y);
 	});
-	//glfwSetFramebufferSizeCallback(window, Z::Camera::ReSize);
 	Z::MyImGui::Init();
 
 	auto vb = std::make_shared<Z::VertexBuffer>(quad, sizeof(quad));
@@ -80,20 +83,29 @@ int main() {
 	va.AddVertexBuffer(vb);
 	va.SetIndexBuffer(ib);
 
-	Z::Shader lighter{}, sample{};
+	Z::Shader lighter{}, sample{},postProcess{};
 	lighter.AddShader("PBR/vertex001.glsl", GL_VERTEX_SHADER);
 	lighter.AddShader("PBR/fragment001.glsl", GL_FRAGMENT_SHADER);
 	lighter.Link();
 	sample.AddShader("PBR/vertex002.glsl", GL_VERTEX_SHADER);
 	sample.AddShader("PBR/fragment002.glsl", GL_FRAGMENT_SHADER);
 	sample.Link();
+	postProcess.AddShader("PBR/vertex003.glsl", GL_VERTEX_SHADER);
+	postProcess.AddShader("PBR/fragment003.glsl", GL_FRAGMENT_SHADER);
+	postProcess.Link();
 
 	Z::UniformBuffer ubo{sizeof(glm::mat4)}, fbo{&lightData, sizeof(LightData)};
+	Z::UniformBuffer postProcessUbo{&postProcessData, sizeof(PostProcessData)};
 	Z::AttachmentSpec attachments;
 	attachments.width = 800;
 	attachments.height = 600;
 	attachments.attachments.push_back({GL_RGBA8, GL_COLOR_ATTACHMENT0});
+	auto postProcessFrame=Z::FrameBuffer(attachments);
+	attachments.attachments.pop_back();
+	attachments.attachments.push_back({GL_RGB32F, GL_COLOR_ATTACHMENT0});
+	attachments.attachments.push_back({GL_RGB32F, GL_COLOR_ATTACHMENT1});
 	auto viewFrame = Z::FrameBuffer(attachments);
+	attachments.attachments.pop_back();
 	attachments.attachments.push_back({GL_RGB16, GL_COLOR_ATTACHMENT1});
 	attachments.attachments.push_back({GL_RGB32F, GL_COLOR_ATTACHMENT2});
 	attachments.attachments.push_back({GL_R16F, GL_COLOR_ATTACHMENT3});
@@ -130,15 +142,15 @@ int main() {
 			             ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus |
 			             ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize |
 			             ImGuiWindowFlags_NoMove);
-			//ImGui::PopStyleVar(2);
 			ImGui::DockSpace(ImGui::GetID("MyDockSpace"));
 		}
-
 
 		auto vp = camera.GetVPMatrix();
 		ubo.SetData(&vp, sizeof(glm::mat4));
 		ubo.Bind(7);
-		lightData.cameraPos = glm::vec4(camera.position, 0.f);
+		postProcessUbo.SetData(&postProcessData, sizeof(PostProcessData));
+		postProcessUbo.Bind(8);
+		lightData.cameraPos = glm::vec4(camera.position, lightData.cameraPos.w);
 		fbo.SetData(&lightData, sizeof(LightData));
 		fbo.Bind(12);
 		fb.Bind();
@@ -156,12 +168,17 @@ int main() {
 		Z::Renderer::SetClearValue({0.f, 0.f, 0.f, 1.0f});
 		fb.BindAttachment();
 		sample.Bind();
-		//Todo: change to Z::Renderer::Draw(va, sample);
 		va.Draw();
 		viewFrame.Unbind();
+		Z::Renderer::SetClearValue({0.1f, 0.1f, 0.1f, 1.0f});
+		postProcessFrame.Bind();
+		postProcess.Bind();
+		viewFrame.BindAttachment();
+		va.Draw();
+		postProcessFrame.Unbind();
 
 		ImGui::Begin("##View", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoScrollbar);
-		ImGui::Image((void *) viewFrame.GetAttachment(0), ImVec2(viewportSize.x, viewportSize.y), ImVec2(0, 1),
+		ImGui::Image((void *)postProcessFrame.GetAttachment(0), ImVec2(viewportSize.x, viewportSize.y), ImVec2(0, 1),
 		             ImVec2(1, 0));
 		Z::Guizmo::Init(ImGui::GetWindowPos(), ImGui::GetWindowSize());
 		viewPortHovered = ImGui::IsWindowHovered();
@@ -169,10 +186,12 @@ int main() {
 		auto viewSize = ImGui::GetWindowSize();
 		if (viewSize.x != viewportSize.x || viewSize.y != viewportSize.y) {
 			viewportSize = glm::vec2{viewSize.x, viewSize.y};
+			postProcessData.viewportSize = viewportSize;
 			attachments.width = viewportSize.x;
 			attachments.height = viewportSize.y;
 			viewFrame.Resize(viewportSize.x, viewportSize.y);
 			fb.Resize(viewportSize.x, viewportSize.y);
+			postProcessFrame.Resize(viewportSize.x, viewportSize.y);
 			camera.aspect = viewportSize.x / viewportSize.y;
 			camera.CalculateMatrix();
 		}
@@ -192,9 +211,9 @@ int main() {
 			Z::Timer::Flush();
 		}
 		ImGui::Text("FPS: %.2f", frame);
-		ImGui::Text("CameraPos: %.2f, %.2f, %.2f", camera.position.x, camera.position.y, camera.position.z);
 		ImGui::Text("Index: %d, %d", Index.x, Index.y);
 		ImGui::Text("CursorPos: %.2f, %.2f", CursorPos.x, CursorPos.y);
+		ImGui::SliderFloat("Bloom Threshold", &lightData.cameraPos[3], .5f, 3.f);
 		ImGui::Combo("Light", &lightIndex, "Light0\0Light1\0Light2\0Light3\0Light4\0");
 		ImGui::DragFloat4("LightPos", &lightData.lightPos[lightIndex][0], .1f);
 		ImGui::DragFloat4("LightCol", &lightData.lightCol[lightIndex][0], .1f);

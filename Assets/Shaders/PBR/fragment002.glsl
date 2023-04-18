@@ -1,5 +1,6 @@
 #version 460
-layout(location=0)out vec4 Fcolor;
+layout(location=0)out vec3 Fcolor;
+layout(location=1)out vec3 bloom;
 layout(location=0)in vec2 tex;
 
 layout(binding = 0)uniform sampler2D Base;
@@ -11,7 +12,7 @@ layout(binding = 5)uniform sampler2D AO;
 layout(binding = 6)uniform sampler2D Depth;
 
 layout(std140, binding=12)uniform Camera{
-    vec3 cameraPos;
+    vec4 cameraPos;
     vec3 lightPos[5];
     vec3 lightCol[5];
 };
@@ -48,24 +49,25 @@ float GeometrySmith(vec3 N, vec3 V, vec3 L, float roughness){
     return ggx1 * ggx2;
 }
 
-vec3 Frenel(vec3 F0, float costa) {
-    return F0 + (1 - F0) * pow(1.f - costa, 5.0f);
+vec3 Frenel(vec3 F0, float costa, float r) {
+    return F0 + (max(vec3(1.0 - r), F0) - F0) * pow(1.0 - costa, 5.0);
 }
+
 
 void main() {
     vec3 wpos=texture(Wpos, tex).rgb;
-    vec3 viewDir = normalize(cameraPos - wpos);
-    vec3 base=pow(texture(Base, tex).rgb,vec3(2.2f));
-    float roughness=texture(Roughness,tex).r;
-    float metallic = texture(Metallic,tex).r;
-    float ao=texture(AO,tex).r;
+    vec3 viewDir = normalize(cameraPos.xyz - wpos);
+    vec3 base=pow(texture(Base, tex).rgb, vec3(2.2f));
+    float roughness=texture(Roughness, tex).r;
+    float metallic = texture(Metallic, tex).r;
+    float ao=texture(AO, tex).r;
     vec3 normal=texture(Normal, tex).rgb;
 
     vec3 F0 = vec3(0.04);
     F0 = mix(F0, base, metallic);
 
     vec3 Lo = vec3(0.0);
-    for(int i = 0; i < 5; ++i)
+    for (int i = 0; i < 5; ++i)
     {
         vec3 L = normalize(lightPos[i] - wpos);
         vec3 H = normalize(viewDir + L);
@@ -75,7 +77,7 @@ void main() {
 
         float NDF = DistributionGGX(normal, H, roughness);
         float G   = GeometrySmith(normal, viewDir, L, roughness);
-        vec3 F    = Frenel(F0,max(dot(H, viewDir), 0.0));
+        vec3 F    = Frenel(F0, max(dot(H, viewDir), 0.0), roughness);
 
         vec3 numerator    = NDF * G * F;
         float denominator = 4.0 * max(dot(normal, viewDir), 0.0) * max(dot(normal, L), 0.0) + 0.0001;
@@ -91,11 +93,13 @@ void main() {
         Lo += (kD * base / PI + specular) * radiance * NdotL;
     }
 
-    vec3 ambient = vec3(0.03) * base * ao;
+    vec3 ambient = vec3(0.01) * base * ao;
 
     vec3 color = ambient + Lo;
-
-    color = color / (color + vec3(1.0));
-    color = pow(color, vec3(1.0/2.2));
-    Fcolor=vec4(color,1.0);
+    if (length(color)>cameraPos.w){
+        bloom= color;
+    } else {
+        bloom=vec3(0.0);
+    }
+    Fcolor=color;
 }

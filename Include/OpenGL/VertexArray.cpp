@@ -60,4 +60,14 @@ namespace Z {
 		Bind();
 		glDrawElements(GL_TRIANGLES, indexBuffer->GetCount(), GL_UNSIGNED_INT, nullptr);
 	}
+
+	void VertexArray::AddVertexBuffer(const float *data, uint32_t size, const BufferLayout &layout) {
+		auto vb = std::make_shared<VertexBuffer>(data, size);
+		vb->SetLayout(layout);
+		AddVertexBuffer(vb);
+	}
+
+	void VertexArray::SetIndexBuffer(const uint32_t *data, uint32_t count) {
+		indexBuffer = std::make_shared<IndexBuffer>(data, count);
+	}
 }

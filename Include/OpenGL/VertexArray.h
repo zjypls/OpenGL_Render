@@ -63,7 +63,9 @@ namespace Z {
 		void Bind() const{glBindVertexArray(id);vertexBuffers[0]->Bind();indexBuffer->Bind();}
 		void Unbind() const{glBindVertexArray(0);}
 		void AddVertexBuffer(const std::shared_ptr<VertexBuffer>& vb);
+		void AddVertexBuffer(const float* data, uint32_t size, const BufferLayout& layout);
 		void SetIndexBuffer(const std::shared_ptr<IndexBuffer>& ib){indexBuffer = ib;}
+		void SetIndexBuffer(const uint32_t* data, uint32_t count);
 		const std::vector<std::shared_ptr<VertexBuffer>>& GetVertexBuffers() const { return vertexBuffers; }
 		const std::shared_ptr<IndexBuffer>& GetIndexBuffer() const { return indexBuffer; }
 

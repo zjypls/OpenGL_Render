@@ -51,7 +51,7 @@ namespace Z {
 
 		void Bind() const;
 
-		void BindAttachment();
+		void BindAttachment(uint32_t index=0);
 
 		void Unbind() const;
 

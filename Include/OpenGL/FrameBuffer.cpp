@@ -17,8 +17,8 @@ namespace Z {
 			glTextureStorage2D(a, 1, attachments.attachments[i].format, width, height);
 			glTextureParameteri(a, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 			glTextureParameteri(a, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-			glTextureParameteri(a, GL_TEXTURE_WRAP_S, GL_REPEAT);
-			glTextureParameteri(a, GL_TEXTURE_WRAP_T, GL_REPEAT);
+			glTextureParameteri(a, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+			glTextureParameteri(a, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 			glFramebufferTexture2D(GL_FRAMEBUFFER, attachments.attachments[i].target, GL_TEXTURE_2D, a, 0);
 			this->attachments.push_back({a, attachments.attachments[i].format, 0, attachments.attachments[i].target});
 		}
@@ -93,9 +93,9 @@ namespace Z {
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
 
-	void FrameBuffer::BindAttachment() {
+	void FrameBuffer::BindAttachment(uint32_t index) {
 		for(int i = 0; i < attachments.size(); ++i){
-			glBindTextureUnit(i, attachments[i].id);
+			glBindTextureUnit(i+index, attachments[i].id);
 		}
 	}
 }
