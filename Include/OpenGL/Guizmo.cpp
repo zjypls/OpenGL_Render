@@ -21,12 +21,15 @@ namespace Z {
 	}
 
 	void
-	Guizmo::DrawGuizmo(glm::mat4 &cameraView, glm::mat4 &cameraProjection, glm::mat4 &transform,ImVec2 pos,ImVec2 size) {
-		ImGuizmo::BeginFrame();
-		auto window = Renderer::GetWindow();
-		ImGuizmo::SetDrawlist();
-		ImGuizmo::SetRect(pos.x, pos.y, size.x, size.y);
+	Guizmo::DrawGuizmo(glm::mat4 &cameraView, glm::mat4 &cameraProjection, glm::mat4 &transform) {
+
 		ImGuizmo::Manipulate(glm::value_ptr(cameraView), glm::value_ptr(cameraProjection), currentOperation, ImGuizmo::LOCAL,
 							 glm::value_ptr(transform));
+	}
+
+	void Guizmo::Init(ImVec2 pos,ImVec2 size) {
+		ImGuizmo::BeginFrame();
+		ImGuizmo::SetDrawlist();
+		ImGuizmo::SetRect(pos.x, pos.y, size.x, size.y);
 	}
 }

@@ -29,7 +29,7 @@ namespace Z {
 		static bool Running() { return !glfwWindowShouldClose(window); }
 		static auto GetWindow() { return window; }
 
-		static void Draw(Model& model,Shader&shader){model.Draw(shader);}
+		static void Draw(const std::shared_ptr<Model>& model,Shader&shader){model->Draw(shader);}
 
 		static void Shutdown() {
 			glfwDestroyWindow(window);
