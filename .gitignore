@@ -1,8 +1,8 @@
 .idea
-Bin/*.exe
-Bin/*.pdb
-Bin/*.ilk
-Bin/*.lib
+*.exe
+*.pdb
+*.ilk
+*.lib
 Lib
 build
 *.dll
