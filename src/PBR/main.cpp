@@ -16,24 +16,13 @@ extern "C"
 __declspec(dllexport) unsigned long NvOptimusEnablement = 0x00000001;
 //__declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
 }
-
-const float QuadVertexes[20]{
-		-1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
-		1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
-		1.0f, 1.0f, 0.0f, 1.0f, 1.0f,
-		-1.0f, 1.0f, 0.0f, 0.0f, 1.0f
-};
-const uint32_t QuadIndices[6]{
-		0, 1, 2,
-		2, 3, 0
-};
-
 Z::Camera camera{
 		{1.5, -1.3, .6},
 		{0, 0, 0},
 		45.f, 8.f / 6.f, 0.1f, 100.f, glm::sqrt(4.2f), 0, 0
 };
 struct LightData {
+	//use vec4 to align for glsl
 	glm::vec4 cameraPos;
 	glm::vec4 lightPos[5], lightCol[5];
 };
@@ -54,13 +43,8 @@ int main() {
 			{{1,  1,  0,  0}, {-10, -10, 10, 0}, {-10, 10, -10, 0}, {-10, -10, 10, 0}, {10, -10, 10, 0}},
 			{{17, 17, 17, 1}, {0,   0,   0,  1}, {0,   0,  0,   1}, {0,   0,   0,  1}, {0,  0,   0,  1}}};
 	PostProcessData postProcessData{{800, 600}};
-	Z::RenderSpec spec;
-	spec.width = 800;
-	spec.height = 600;
+	Z::RenderSpec spec{};
 	spec.title = "PBR";
-	spec.maxBufferSize = 1024;
-	spec.fullScreen = false;
-	spec.vsync = false;
 
 	Z::Renderer::Init(spec);
 	auto window = Z::Renderer::GetWindow();
@@ -73,16 +57,10 @@ int main() {
 		camera.Scroll(w, x, y);
 	});
 	Z::MyImGui::Init();
-	auto QuadVertexBuffer = std::make_shared<Z::VertexBuffer>(QuadVertexes, sizeof(QuadVertexes));
-	Z::BufferLayout layout{{Z::BufferLayout::Element{"pos", GL_FLOAT, 3, sizeof(float), false, 0},
-	                        {"tex", GL_FLOAT, 2, sizeof(uint32_t), false, 0}}};
-	QuadVertexBuffer->SetLayout(layout);
-	auto QuadIndexBuffer = std::make_shared<Z::IndexBuffer>(QuadIndices, sizeof(QuadIndices));
-	Z::VertexArray QuadArray;
-	QuadArray.AddVertexBuffer(QuadVertexBuffer);
-	QuadArray.SetIndexBuffer(QuadIndexBuffer);
 
-	Z::Shader SamplerShader{}, LightComputeShader{},PostProcessShader{};
+	auto QuadArray = Z::Renderer::GetQuadVertexArray();
+
+	Z::Shader SamplerShader{}, LightComputeShader{}, PostProcessShader{};
 	SamplerShader.AddShader("PBR/Sampler.vert", GL_VERTEX_SHADER);
 	SamplerShader.AddShader("PBR/Sampler.frag", GL_FRAGMENT_SHADER);
 	SamplerShader.Link();
@@ -99,7 +77,7 @@ int main() {
 	attachmentsSpec.width = 800;
 	attachmentsSpec.height = 600;
 	attachmentsSpec.attachments.push_back({GL_RGBA8, GL_COLOR_ATTACHMENT0});
-	auto postProcessFrame=Z::FrameBuffer(attachmentsSpec);
+	auto postProcessFrame = Z::FrameBuffer(attachmentsSpec);
 	attachmentsSpec.attachments.pop_back();
 	attachmentsSpec.attachments.push_back({GL_RGB32F, GL_COLOR_ATTACHMENT0});
 	attachmentsSpec.attachments.push_back({GL_RGB32F, GL_COLOR_ATTACHMENT1});
@@ -118,7 +96,6 @@ int main() {
 	std::vector<std::shared_ptr<Z::Model>> models;
 	models.emplace_back(std::make_shared<Z::Model>("lighter/lighter.fbx"));
 
-	glEnable(GL_DEPTH_TEST);
 	auto walkControl = std::thread{Z::Camera::Walk, window};
 	static bool viewPortHovered = false, viewPortFocused = false;
 	static ImVec2 CursorPos{};
@@ -127,21 +104,11 @@ int main() {
 	while (Z::Renderer::Running()) {
 		Z::Timer::Update();
 		Z::MyImGui::Begin();
-		{
-			ImGuiViewport *viewport = ImGui::GetMainViewport();
-			ImGui::SetNextWindowPos(viewport->Pos);
-			ImGui::SetNextWindowSize(viewport->Size);
-			ImGui::SetNextWindowViewport(viewport->ID);
-			ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
-			ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
-			ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
-			ImGui::Begin("DockSpace Demo", nullptr,
-			             ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoBackground |
-			             ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus |
-			             ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize |
-			             ImGuiWindowFlags_NoMove);
-			ImGui::DockSpace(ImGui::GetID("MyDockSpace"));
-		}
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+		ImGuiViewport* viewport = ImGui::GetMainViewport();
+		Z::MyImGui::BeginDockSpace(viewport);
 
 		auto ViewProjectionMat = camera.GetVPMatrix();
 		CameraDataUniformBuffer.SetData(&ViewProjectionMat, sizeof(glm::mat4));
@@ -166,17 +133,18 @@ int main() {
 		Z::Renderer::SetClearValue({0.f, 0.f, 0.f, 1.0f});
 		firstSampleFrame.BindAttachment();
 		LightComputeShader.Bind();
-		QuadArray.Draw();
+		QuadArray->Draw();
 		LightViewFrame.Unbind();
 		Z::Renderer::SetClearValue({0.1f, 0.1f, 0.1f, 1.0f});
 		postProcessFrame.Bind();
 		PostProcessShader.Bind();
 		LightViewFrame.BindAttachment();
-		QuadArray.Draw();
+		QuadArray->Draw();
 		postProcessFrame.Unbind();
 
 		ImGui::Begin("##View", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoScrollbar);
-		ImGui::Image((void *)postProcessFrame.GetAttachment(0), ImVec2(g_viewportSize.x, g_viewportSize.y), ImVec2(0, 1),
+		ImGui::Image((void *) postProcessFrame.GetAttachment(0), ImVec2(g_viewportSize.x, g_viewportSize.y),
+		             ImVec2(0, 1),
 		             ImVec2(1, 0));
 		Z::Guizmo::Init(ImGui::GetWindowPos(), ImGui::GetWindowSize());
 		viewPortHovered = ImGui::IsWindowHovered();
@@ -220,7 +188,6 @@ int main() {
 		ImGui::Text("Scroll to change focus distance");
 
 		ImGui::End();
-
 
 		ImGui::End();
 		Z::MyImGui::End();

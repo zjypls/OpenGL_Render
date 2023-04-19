@@ -13,13 +13,13 @@
 namespace Z {
 	using namespace glm;
 		struct RenderSpec{
-			int width;
-			int height;
+			int width=800;
+			int height=600;
 			const char* title;
-			uint32_t maxBufferSize;
+			uint32_t maxBufferSize{};
 
 			bool fullScreen=false;
-			bool vsync=true;
+			bool vsync=false;
 		};
 	class Renderer {
 		static GLFWwindow *window;
@@ -36,6 +36,7 @@ namespace Z {
 			glfwDestroyWindow(window);
 			glfwTerminate();
 		}
+		static std::shared_ptr<VertexArray> GetQuadVertexArray();
 		static void SwapBuffers() { glfwSwapBuffers(window);glfwPollEvents(); }
 
 		static void SetClearValue(const vec4&value) { glClearColor(value.x,value.y,value.z,value.w); glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT); }

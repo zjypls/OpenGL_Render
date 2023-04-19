@@ -70,4 +70,13 @@ namespace Z {
 	void VertexArray::SetIndexBuffer(const uint32_t *data, uint32_t count) {
 		indexBuffer = std::make_shared<IndexBuffer>(data, count);
 	}
+
+	VertexArray::VertexArray(const std::initializer_list<std::shared_ptr<VertexBuffer>> &vertexBuffers,
+	                         const std::shared_ptr<IndexBuffer> &indexBuffer) {
+		glCreateVertexArrays(1, &id);
+		for (auto &vb: vertexBuffers) {
+			AddVertexBuffer(vb);
+		}
+		SetIndexBuffer(indexBuffer);
+	}
 }

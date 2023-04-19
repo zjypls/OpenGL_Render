@@ -41,7 +41,7 @@ namespace Z {
 		GLenum target;
 	};
 	struct AttachmentSpec {
-		uint32_t width, height;
+		uint32_t width=800, height=600;
 		std::vector<Attachment> attachments;
 	};
 

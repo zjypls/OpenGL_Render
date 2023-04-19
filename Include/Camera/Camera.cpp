@@ -2,7 +2,6 @@
 // Created by 32725 on 2023/4/16.
 //
 
-#include "glad/glad/glad.h"
 #include "Camera.h"
 #include "OpenGL/Timer.h"
 #include "glm/glm/gtc/matrix_transform.hpp"
@@ -62,7 +61,6 @@ namespace Z {
 	void Camera::ReSize(GLFWwindow *window, int width, int height) {
 		auto camera = (Camera *) glfwGetWindowUserPointer(window);
 		camera->aspect = (float) width / height;
-		glViewport(0, 0, width, height);
 		camera->Resize = true;
 		camera->width = width;
 		camera->height = height;

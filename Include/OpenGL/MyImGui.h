@@ -12,6 +12,8 @@ public:
 	static void Begin();
 	static void End();
 	static void Shutdown();
+	static void BeginDockSpace(ImGuiViewport* viewport);
+	static void EndDockSpace(){ImGui::End();}
 };
 
 }

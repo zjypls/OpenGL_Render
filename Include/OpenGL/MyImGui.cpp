@@ -49,3 +49,15 @@ void Z::MyImGui::Shutdown() {
 	ImGui_ImplGlfw_Shutdown();
 	ImGui::DestroyContext();
 }
+
+void Z::MyImGui::BeginDockSpace(ImGuiViewport* viewport) {
+	ImGui::SetNextWindowPos(viewport->Pos);
+	ImGui::SetNextWindowSize(viewport->Size);
+	ImGui::SetNextWindowViewport(viewport->ID);
+	ImGui::Begin("DockSpace Demo", nullptr,
+	             ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoBackground |
+	             ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus |
+	             ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize |
+	             ImGuiWindowFlags_NoMove);
+	ImGui::DockSpace(ImGui::GetID("MyDockSpace"));
+}
