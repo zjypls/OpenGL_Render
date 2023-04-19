@@ -17,13 +17,13 @@ __declspec(dllexport) unsigned long NvOptimusEnablement = 0x00000001;
 //__declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
 }
 
-const float quad[20]{
+const float QuadVertexes[20]{
 		-1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
 		1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
 		1.0f, 1.0f, 0.0f, 1.0f, 1.0f,
 		-1.0f, 1.0f, 0.0f, 0.0f, 1.0f
 };
-const uint32_t indices[6]{
+const uint32_t QuadIndices[6]{
 		0, 1, 2,
 		2, 3, 0
 };
@@ -40,7 +40,7 @@ struct LightData {
 struct PostProcessData {
 	glm::vec2 viewportSize;
 };
-glm::vec2 viewportSize{800, 600};
+glm::vec2 g_viewportSize{800, 600};
 
 ImVec2 operator-(const ImVec2 &a, const ImVec2 &b) {
 	return {a.x - b.x, a.y - b.y};
@@ -73,59 +73,57 @@ int main() {
 		camera.Scroll(w, x, y);
 	});
 	Z::MyImGui::Init();
-
-	auto vb = std::make_shared<Z::VertexBuffer>(quad, sizeof(quad));
+	auto QuadVertexBuffer = std::make_shared<Z::VertexBuffer>(QuadVertexes, sizeof(QuadVertexes));
 	Z::BufferLayout layout{{Z::BufferLayout::Element{"pos", GL_FLOAT, 3, sizeof(float), false, 0},
 	                        {"tex", GL_FLOAT, 2, sizeof(uint32_t), false, 0}}};
-	vb->SetLayout(layout);
-	auto ib = std::make_shared<Z::IndexBuffer>(indices, sizeof(indices));
-	Z::VertexArray va;
-	va.AddVertexBuffer(vb);
-	va.SetIndexBuffer(ib);
+	QuadVertexBuffer->SetLayout(layout);
+	auto QuadIndexBuffer = std::make_shared<Z::IndexBuffer>(QuadIndices, sizeof(QuadIndices));
+	Z::VertexArray QuadArray;
+	QuadArray.AddVertexBuffer(QuadVertexBuffer);
+	QuadArray.SetIndexBuffer(QuadIndexBuffer);
 
-	Z::Shader lighter{}, sample{},postProcess{};
-	lighter.AddShader("PBR/vertex001.glsl", GL_VERTEX_SHADER);
-	lighter.AddShader("PBR/fragment001.glsl", GL_FRAGMENT_SHADER);
-	lighter.Link();
-	sample.AddShader("PBR/vertex002.glsl", GL_VERTEX_SHADER);
-	sample.AddShader("PBR/fragment002.glsl", GL_FRAGMENT_SHADER);
-	sample.Link();
-	postProcess.AddShader("PBR/vertex003.glsl", GL_VERTEX_SHADER);
-	postProcess.AddShader("PBR/fragment003.glsl", GL_FRAGMENT_SHADER);
-	postProcess.Link();
+	Z::Shader SamplerShader{}, LightComputeShader{},PostProcessShader{};
+	SamplerShader.AddShader("PBR/Sampler.vert", GL_VERTEX_SHADER);
+	SamplerShader.AddShader("PBR/Sampler.frag", GL_FRAGMENT_SHADER);
+	SamplerShader.Link();
+	LightComputeShader.AddShader("PBR/Light.vert", GL_VERTEX_SHADER);
+	LightComputeShader.AddShader("PBR/Light.frag", GL_FRAGMENT_SHADER);
+	LightComputeShader.Link();
+	PostProcessShader.AddShader("PBR/PostProcess.vert", GL_VERTEX_SHADER);
+	PostProcessShader.AddShader("PBR/PostProcess.frag", GL_FRAGMENT_SHADER);
+	PostProcessShader.Link();
 
-	Z::UniformBuffer ubo{sizeof(glm::mat4)}, fbo{&lightData, sizeof(LightData)};
+	Z::UniformBuffer CameraDataUniformBuffer{sizeof(glm::mat4)}, LightDataUniformBuffer{&lightData, sizeof(LightData)};
 	Z::UniformBuffer postProcessUbo{&postProcessData, sizeof(PostProcessData)};
-	Z::AttachmentSpec attachments;
-	attachments.width = 800;
-	attachments.height = 600;
-	attachments.attachments.push_back({GL_RGBA8, GL_COLOR_ATTACHMENT0});
-	auto postProcessFrame=Z::FrameBuffer(attachments);
-	attachments.attachments.pop_back();
-	attachments.attachments.push_back({GL_RGB32F, GL_COLOR_ATTACHMENT0});
-	attachments.attachments.push_back({GL_RGB32F, GL_COLOR_ATTACHMENT1});
-	auto viewFrame = Z::FrameBuffer(attachments);
-	attachments.attachments.pop_back();
-	attachments.attachments.push_back({GL_RGB16, GL_COLOR_ATTACHMENT1});
-	attachments.attachments.push_back({GL_RGB32F, GL_COLOR_ATTACHMENT2});
-	attachments.attachments.push_back({GL_R16F, GL_COLOR_ATTACHMENT3});
-	attachments.attachments.push_back({GL_R16F, GL_COLOR_ATTACHMENT4});
-	attachments.attachments.push_back({GL_R16F, GL_COLOR_ATTACHMENT5});
-	attachments.attachments.push_back({GL_R16F, GL_COLOR_ATTACHMENT6});
-	attachments.attachments.push_back({GL_RG32I, GL_COLOR_ATTACHMENT7});
-	attachments.attachments.push_back({GL_DEPTH24_STENCIL8, GL_DEPTH_STENCIL_ATTACHMENT});
-	auto fb = Z::FrameBuffer(attachments);
+	Z::AttachmentSpec attachmentsSpec;
+	attachmentsSpec.width = 800;
+	attachmentsSpec.height = 600;
+	attachmentsSpec.attachments.push_back({GL_RGBA8, GL_COLOR_ATTACHMENT0});
+	auto postProcessFrame=Z::FrameBuffer(attachmentsSpec);
+	attachmentsSpec.attachments.pop_back();
+	attachmentsSpec.attachments.push_back({GL_RGB32F, GL_COLOR_ATTACHMENT0});
+	attachmentsSpec.attachments.push_back({GL_RGB32F, GL_COLOR_ATTACHMENT1});
+	auto LightViewFrame = Z::FrameBuffer(attachmentsSpec);
+	attachmentsSpec.attachments.pop_back();
+	attachmentsSpec.attachments.push_back({GL_RGB16, GL_COLOR_ATTACHMENT1});
+	attachmentsSpec.attachments.push_back({GL_RGB32F, GL_COLOR_ATTACHMENT2});
+	attachmentsSpec.attachments.push_back({GL_R16F, GL_COLOR_ATTACHMENT3});
+	attachmentsSpec.attachments.push_back({GL_R16F, GL_COLOR_ATTACHMENT4});
+	attachmentsSpec.attachments.push_back({GL_R16F, GL_COLOR_ATTACHMENT5});
+	attachmentsSpec.attachments.push_back({GL_R16F, GL_COLOR_ATTACHMENT6});
+	attachmentsSpec.attachments.push_back({GL_RG32I, GL_COLOR_ATTACHMENT7});
+	attachmentsSpec.attachments.push_back({GL_DEPTH24_STENCIL8, GL_DEPTH_STENCIL_ATTACHMENT});
+	auto firstSampleFrame = Z::FrameBuffer(attachmentsSpec);
 
 	std::vector<std::shared_ptr<Z::Model>> models;
 	models.emplace_back(std::make_shared<Z::Model>("lighter/lighter.fbx"));
-	//Z::Model model{"lighter/lighter.fbx"};
 
 	glEnable(GL_DEPTH_TEST);
 	auto walkControl = std::thread{Z::Camera::Walk, window};
 	static bool viewPortHovered = false, viewPortFocused = false;
 	static ImVec2 CursorPos{};
-	static glm::ivec2 Index{-1, -1};
-	static int lightIndex = 0;
+	static glm::ivec2 ModelIndex{-1, -1};
+	static int CurrentLightIndex = 0;
 	while (Z::Renderer::Running()) {
 		Z::Timer::Update();
 		Z::MyImGui::Begin();
@@ -145,58 +143,58 @@ int main() {
 			ImGui::DockSpace(ImGui::GetID("MyDockSpace"));
 		}
 
-		auto vp = camera.GetVPMatrix();
-		ubo.SetData(&vp, sizeof(glm::mat4));
-		ubo.Bind(7);
+		auto ViewProjectionMat = camera.GetVPMatrix();
+		CameraDataUniformBuffer.SetData(&ViewProjectionMat, sizeof(glm::mat4));
+		CameraDataUniformBuffer.Bind(7);
 		postProcessUbo.SetData(&postProcessData, sizeof(PostProcessData));
 		postProcessUbo.Bind(8);
 		lightData.cameraPos = glm::vec4(camera.position, lightData.cameraPos.w);
-		fbo.SetData(&lightData, sizeof(LightData));
-		fbo.Bind(12);
-		fb.Bind();
+		LightDataUniformBuffer.SetData(&lightData, sizeof(LightData));
+		LightDataUniformBuffer.Bind(12);
+		firstSampleFrame.Bind();
 		Z::Renderer::SetClearValue({0.1f, 0.1f, 0.1f, .0f});
-		fb.ClearAttachment(7, glm::ivec2{-1, -1});
+		firstSampleFrame.ClearAttachment(7, glm::ivec2{-1, -1});
 		for (auto &model: models) {
-			Z::Renderer::Draw(model, lighter);
+			Z::Renderer::Draw(model, SamplerShader);
 		}
 		if (viewPortFocused && viewPortHovered && ImGui::IsMouseClicked(ImGuiMouseButton_Middle)) {
 			CursorPos = ImGui::GetMousePos() - ImGui::GetWindowPos();
-			CursorPos.y = viewportSize.y - CursorPos.y;
-			Index = fb.ReadPixel<glm::ivec2>(7, CursorPos.x, CursorPos.y);
+			CursorPos.y = g_viewportSize.y - CursorPos.y;
+			ModelIndex = firstSampleFrame.ReadPixel<glm::ivec2>(7, CursorPos.x, CursorPos.y);
 		}
-		viewFrame.Bind();
+		LightViewFrame.Bind();
 		Z::Renderer::SetClearValue({0.f, 0.f, 0.f, 1.0f});
-		fb.BindAttachment();
-		sample.Bind();
-		va.Draw();
-		viewFrame.Unbind();
+		firstSampleFrame.BindAttachment();
+		LightComputeShader.Bind();
+		QuadArray.Draw();
+		LightViewFrame.Unbind();
 		Z::Renderer::SetClearValue({0.1f, 0.1f, 0.1f, 1.0f});
 		postProcessFrame.Bind();
-		postProcess.Bind();
-		viewFrame.BindAttachment();
-		va.Draw();
+		PostProcessShader.Bind();
+		LightViewFrame.BindAttachment();
+		QuadArray.Draw();
 		postProcessFrame.Unbind();
 
 		ImGui::Begin("##View", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoScrollbar);
-		ImGui::Image((void *)postProcessFrame.GetAttachment(0), ImVec2(viewportSize.x, viewportSize.y), ImVec2(0, 1),
+		ImGui::Image((void *)postProcessFrame.GetAttachment(0), ImVec2(g_viewportSize.x, g_viewportSize.y), ImVec2(0, 1),
 		             ImVec2(1, 0));
 		Z::Guizmo::Init(ImGui::GetWindowPos(), ImGui::GetWindowSize());
 		viewPortHovered = ImGui::IsWindowHovered();
 		viewPortFocused = ImGui::IsWindowFocused();
 		auto viewSize = ImGui::GetWindowSize();
-		if (viewSize.x != viewportSize.x || viewSize.y != viewportSize.y) {
-			viewportSize = glm::vec2{viewSize.x, viewSize.y};
-			postProcessData.viewportSize = viewportSize;
-			attachments.width = viewportSize.x;
-			attachments.height = viewportSize.y;
-			viewFrame.Resize(viewportSize.x, viewportSize.y);
-			fb.Resize(viewportSize.x, viewportSize.y);
-			postProcessFrame.Resize(viewportSize.x, viewportSize.y);
-			camera.aspect = viewportSize.x / viewportSize.y;
+		if (viewSize.x != g_viewportSize.x || viewSize.y != g_viewportSize.y) {
+			g_viewportSize = glm::vec2{viewSize.x, viewSize.y};
+			postProcessData.viewportSize = g_viewportSize;
+			attachmentsSpec.width = g_viewportSize.x;
+			attachmentsSpec.height = g_viewportSize.y;
+			LightViewFrame.Resize(g_viewportSize.x, g_viewportSize.y);
+			firstSampleFrame.Resize(g_viewportSize.x, g_viewportSize.y);
+			postProcessFrame.Resize(g_viewportSize.x, g_viewportSize.y);
+			camera.aspect = g_viewportSize.x / g_viewportSize.y;
 			camera.CalculateMatrix();
 		}
-		if (Index.x != -1 && Index.y != -1 && Index.x < models.size()) {
-			Z::Guizmo::DrawGuizmo(camera.viewMatrix, camera.projectionMatrix, models[Index.x]->GetModelMatrix());
+		if (ModelIndex.x != -1 && ModelIndex.y != -1 && ModelIndex.x < models.size()) {
+			Z::Guizmo::DrawGuizmo(camera.viewMatrix, camera.projectionMatrix, models[ModelIndex.x]->GetModelMatrix());
 		}
 
 
@@ -211,12 +209,12 @@ int main() {
 			Z::Timer::Flush();
 		}
 		ImGui::Text("FPS: %.2f", frame);
-		ImGui::Text("Index: %d, %d", Index.x, Index.y);
+		ImGui::Text("Index: %d, %d", ModelIndex.x, ModelIndex.y);
 		ImGui::Text("CursorPos: %.2f, %.2f", CursorPos.x, CursorPos.y);
 		ImGui::SliderFloat("Bloom Threshold", &lightData.cameraPos[3], .5f, 3.f);
-		ImGui::Combo("Light", &lightIndex, "Light0\0Light1\0Light2\0Light3\0Light4\0");
-		ImGui::DragFloat4("LightPos", &lightData.lightPos[lightIndex][0], .1f);
-		ImGui::DragFloat4("LightCol", &lightData.lightCol[lightIndex][0], .1f);
+		ImGui::Combo("Light", &CurrentLightIndex, "Light0\0Light1\0Light2\0Light3\0Light4\0");
+		ImGui::DragFloat4("LightPos", &lightData.lightPos[CurrentLightIndex][0], .1f);
+		ImGui::DragFloat4("LightCol", &lightData.lightCol[CurrentLightIndex][0], .1f);
 		ImGui::Text("Right Mouse Button to rotate camera");
 		ImGui::Text("Middle Mouse Button to pick model and show guizmo");
 		ImGui::Text("Scroll to change focus distance");
