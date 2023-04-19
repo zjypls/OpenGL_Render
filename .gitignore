@@ -3,7 +3,8 @@ Bin/*.exe
 Bin/*.pdb
 Bin/*.ilk
 Bin/*.lib
-Bin/*.dll
 Lib
+build
+*.dll
 cmake-build-debug
 cmake-build-release
