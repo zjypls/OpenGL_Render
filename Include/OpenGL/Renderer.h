@@ -28,6 +28,7 @@ namespace Z {
 		static void Init(const RenderSpec&spec);
 		static bool Running() { return !glfwWindowShouldClose(window); }
 		static auto GetWindow() { return window; }
+		static void BindDefaultFrameBuffer() { glBindFramebuffer(GL_FRAMEBUFFER, 0); }
 
 		static void Draw(const std::shared_ptr<Model>& model,Shader&shader){model->Draw(shader);}
 		static void Draw(const std::shared_ptr<VertexArray>& vertexArray,Shader&shader){shader.Bind();vertexArray->Draw();}

@@ -1,7 +1,7 @@
 //
 // Created by 32725 on 2023/4/17.
 //
-
+#include "Objects.h"
 #include "OpenGL/Renderer.h"
 #include "Camera/Camera.h"
 #include "OpenGL/FrameBuffer.h"
@@ -14,18 +14,36 @@ struct CameraData {
 	glm::vec4 vertical;
 	glm::vec4 origin;
 	glm::vec4 direction;
+	glm::vec4 control;
 };
 
-Z::Camera camera{{0, 0, 0}, {0, 0, -1}, 90, 800.0f / 600.0f, 0.1f, 100.0f, 1};
+Z::Camera camera{{1, .75, 0}, {0, 0, 0}, 90, 800.0f / 600.0f, 0.1f, 100.0f, 1};
 glm::vec2 g_viewportSize{800, 600};
-
+World world{
+		{Sphere{{-.5, 1, 0, 1}}, Sphere{{-1, -100, 0, 100}}},
+		{Face{{1,  -1,     1,  0},
+		      {1,  -1,     -1, 0},
+		      {-1, -1,     -1, 0},
+		      {-1, -1,     1,  0},
+		      {-1, -1.005, -1, 0},
+		      {1,  -.995,  1,  0},
+		      {0,  1,      0,  0}},
+		 Face{{1,  1.5,   1,  0},
+		      {1,  1.5,   -1, 0},
+		      {-1, 1.5,   -1, 0},
+		      {-1, 1.5,   1,  0},
+		      {-1, 1.495, -1, 0},
+		      {1,  1.505, 1,  0},
+		      {0,  1,     0,  0}}}
+};
 
 int main() {
 	CameraData cameraData{
 			glm::vec4{0, 0, -1, 0} * (g_viewportSize.x / 200.f),
 			glm::vec4{0, 1, 0, 0} * (g_viewportSize.y / 200.f),
-			{-1, 0, 0, 0},
-			{1,  0, 0, 1}};
+			{1, .75, 0, 0},
+			{-1, 0, 0, 2},
+			{10.f,1,800,600}};
 	Z::RenderSpec spec{};
 	spec.title = "Ray Tracing in One Weekend";
 	Z::Renderer::Init(spec);
@@ -34,51 +52,90 @@ int main() {
 	RayShader.AddShader("RayTracingOneWeek/Quad.vert", GL_VERTEX_SHADER);
 	RayShader.AddShader("RayTracingOneWeek/Tracing.frag", GL_FRAGMENT_SHADER);
 	RayShader.Link();
-	Z::AttachmentSpec attachments{};
-	attachments.attachments.push_back({GL_RGBA8, GL_COLOR_ATTACHMENT0});
 
-	auto QuadArray = Z::Renderer::GetQuadVertexArray();
 	auto attachmentsSpec = Z::AttachmentSpec();
 	attachmentsSpec.attachments.push_back({GL_RGBA8, GL_COLOR_ATTACHMENT0});
 	auto beforeFrame = Z::FrameBuffer(attachmentsSpec);
+	auto afterFrame = Z::FrameBuffer(attachmentsSpec);
+
+	auto QuadArray = Z::Renderer::GetQuadVertexArray();
 	auto cameraDataBuffer = Z::UniformBuffer(&cameraData, sizeof(CameraData));
+	auto worldDataBuffer = Z::UniformBuffer(&world, sizeof(World));
 
-
+	uint32_t frameCount = 1;
 	while (Z::Renderer::Running()) {
 		Z::Timer::Update();
+
+		cameraData.control.y=frameCount;
+		cameraDataBuffer.SetData(&cameraData, sizeof(CameraData));
+		if(frameCount%2){
+			beforeFrame.Bind();
+			afterFrame.BindAttachment();
+		}else{
+			afterFrame.Bind();
+			beforeFrame.BindAttachment();
+		}
 		Z::Renderer::SetClearValue({0.0f, 0.0f, 0.0f, 1.0f});
 		Z::MyImGui::Begin();
-		beforeFrame.Bind();
 		cameraDataBuffer.Bind(0);
-
+		worldDataBuffer.Bind(1);
 		RayShader.Bind();
 		QuadArray->Draw();
-		beforeFrame.Unbind();
+		Z::Renderer::BindDefaultFrameBuffer();
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
 		ImGuiViewport *viewport = ImGui::GetMainViewport();
 		Z::MyImGui::BeginDockSpace(viewport);
 		ImGui::Begin("##viewport", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoScrollbar);
-		ImGui::Image((void *) beforeFrame.GetAttachment(0), ImVec2(g_viewportSize.x, g_viewportSize.y), ImVec2(0, 1), ImVec2(1, 0));
+		ImGui::Image((void *) (frameCount%2?beforeFrame.GetAttachment(0):afterFrame.GetAttachment(0)), ImVec2(g_viewportSize.x, g_viewportSize.y), ImVec2(0, 1),
+		             ImVec2(1, 0));
 		if (auto viewSize = ImGui::GetWindowSize();viewSize.x != g_viewportSize.x || viewSize.y != g_viewportSize.y) {
+			frameCount=0;
 			g_viewportSize = {viewSize.x, viewSize.y};
 			beforeFrame.Resize(g_viewportSize.x, g_viewportSize.y);
-			cameraData.horizon = {0, 0, -1, g_viewportSize.x / 200.f};
-			cameraData.vertical = {0, 1, 0, g_viewportSize.y / 200.f};
+			afterFrame.Resize(g_viewportSize.x, g_viewportSize.y);
+			cameraData.horizon = glm::vec4{0, 0, -1, 0} * g_viewportSize.x / 200.f;
+			cameraData.vertical = glm::vec4{0, 1, 0, 0} * g_viewportSize.y / 200.f;
+			cameraData.control.z = g_viewportSize.x;
+			cameraData.control.w = g_viewportSize.y;
 			camera.width = g_viewportSize.x;
 			camera.height = g_viewportSize.y;
 			camera.aspect = g_viewportSize.x / g_viewportSize.y;
 			cameraDataBuffer.SetData(&cameraData, sizeof(CameraData));
 		}
 		ImGui::End();
+		static float deltaTime=Z::Timer::GetDeltaTime()*1000;
+		static float fps = 1/deltaTime*1000;
+		if(Z::Timer::GetFlushTime()>1){
+			deltaTime = Z::Timer::GetDeltaTime();
+			fps = 1/deltaTime;
+			deltaTime*=1000;
+			Z::Timer::Flush();
+		}
+		ImGui::Begin("Setting");
+		ImGui::Text("FPS: %.2f", fps);
+		ImGui::Text("Delta Time: %.3f ms", deltaTime);
+		if(ImGui::SliderFloat("Distance", &cameraData.direction.w, .5, 10)){
+			frameCount=0;
+			cameraDataBuffer.SetData(&cameraData, sizeof(CameraData));
+		}
+		if(ImGui::DragFloat3("Origin", &cameraData.origin.x, 0.1, -10,10)){
+			frameCount=0;
+			cameraDataBuffer.SetData(&cameraData, sizeof(CameraData));
+		}
+		if(ImGui::SliderFloat("Depth", &cameraData.control.x, 2.f, 50.f)){
+			frameCount=0;
+			cameraDataBuffer.SetData(&cameraData, sizeof(CameraData));
+		}
+		ImGui::End();
 		ImGui::PopStyleVar(3);
-
 
 		Z::MyImGui::EndDockSpace();
 		Z::MyImGui::End();
 
 		Z::Renderer::SwapBuffers();
+		++frameCount;
 	}
 	Z::Renderer::Shutdown();
 }
