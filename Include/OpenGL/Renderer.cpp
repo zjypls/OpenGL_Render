@@ -21,24 +21,11 @@ Z::BufferLayout QuadDefaultLayout{{Z::BufferLayout::Element{"pos", GL_FLOAT, 3, 
 
 namespace Z {
 
-	struct Triangle {
-		vec3 p1;
-		vec3 p2;
-		vec3 p3;
-	};
-	struct RenderData {
-		Triangle *RenderBuffer;
-		Triangle *currentPtr;
-	};
-
 	GLFWwindow *Renderer::window = nullptr;
 	RenderSpec Renderer::Spec;
-	static RenderData *data = nullptr;
 
 	void Renderer::Init(const RenderSpec &spec) {
-		data = new RenderData();
 		Spec = spec;
-		data->RenderBuffer = new Triangle[Spec.maxBufferSize];
 		int i = glfwInit();
 		assert(i);
 		window = glfwCreateWindow(spec.width, spec.height, spec.title,

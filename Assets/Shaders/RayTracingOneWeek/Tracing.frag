@@ -1,15 +1,18 @@
 #version 460
-
+#define LAMBERT 1
+#define MIRROR 2
+#define GLASS 3
+#define META 4
 struct Ray{ vec3 origin;vec3 direction; };
-struct Sphere{ vec4 center;vec4 color; };
-struct Plane{ vec4 v0, v1, v2, v3, minV, maxV;vec4 normal;vec4 color; };
-struct HitRecord{ float t;vec3 p;vec3 normal;vec4 color; };
+struct Sphere{ vec4 center;vec4 color;ivec4 info; };
+struct Plane{ vec4 v0, v1, v2, v3, minV, maxV;vec4 normal;vec4 color;ivec4 info; };
+struct HitRecord{ float t;vec3 p;vec3 normal;vec4 color;ivec4 Info; };
 layout(location=0)out vec4 color;
 layout(location=0)in vec2 texcoord;
 layout(binding=0)uniform sampler2D otherFrame;
-layout(binding=0) uniform Data{ vec4 horizon;vec4 vertical;vec4 origin;vec4 direction;vec4 control; };
+layout(binding=0) uniform Data{ vec4 horizon;vec4 vertical;vec4 origin;vec4 direction;ivec4 control; };
 layout(binding=1)uniform World{
-    Sphere spheres[2];
+    Sphere spheres[3];
     Plane planes[2];
     vec4 count;
 };
@@ -51,6 +54,7 @@ void HitSphere(in Sphere sphere, inout Ray ray, inout HitRecord record){
             record.p=ray.origin+t*ray.direction;
             record.normal=(record.p-sphere.center.xyz)/sphere.center.w;
             record.color=sphere.color;
+            record.Info=sphere.info;
         }
     }
 }
@@ -66,6 +70,7 @@ void HitPlane(in Plane plane, in Ray ray, inout HitRecord record){
     record.p=p;
     record.normal=plane.normal.xyz;
     record.color=plane.color;
+    record.Info=plane.info;
 }
 
 bool HitWorld(inout Ray ray, inout HitRecord record){
@@ -75,16 +80,54 @@ bool HitWorld(inout Ray ray, inout HitRecord record){
     return record.t<1E2;
 }
 
+void ProcessResult(inout Ray ray,inout HitRecord record){
+    switch(record.Info.x){
+        case LAMBERT:
+            ray.direction=GetRandomVec(record.normal);
+            ray.origin=record.p;
+            break;
+        case MIRROR:
+            ray.direction=reflect(ray.direction, record.normal);
+            ray.origin=record.p;
+            break;
+        case GLASS:
+            float n=1.0/record.Info.y;
+            float cosi=clamp(-1, 1, dot(ray.direction, record.normal));
+            float etai=1, etat=n;
+            vec3 n1=record.normal;
+            if (cosi<0){
+                cosi=-cosi;
+            }else{
+                etai=n;
+                etat=1;
+                n1=-record.normal;
+            }
+            float eta=etai/etat;
+            float k=1-eta*eta*(1-cosi*cosi);
+            if (k<0){
+                ray.direction=reflect(ray.direction, record.normal);
+                ray.origin=record.p;
+            }else{
+                ray.direction=normalize(eta*ray.direction+(eta*cosi-sqrt(k))*n1);
+                ray.origin=record.p;
+            }
+            break;
+        case META:
+        ray.direction=reflect(ray.direction, record.normal);
+        ray.origin=record.p;
+        break;
+    }
+}
+
 vec4 GetColor(Ray ray){
     HitRecord record;
     record.t=1E3;
-    int depth=int(control.x);
+    int depth=control.x;
     color=vec4(1, 1, 1, 1);
     while (--depth>-1&&HitWorld(ray, record)){
         record.t=1E3;
         color*=record.color*.8;
-        ray.direction=GetRandomVec(record.normal);
-        ray.origin=record.p;
+        ProcessResult(ray, record);
     }
 
     vec3 direction=normalize(ray.direction);
@@ -104,5 +147,5 @@ void main() {
         }
     }
     color=temp/4.f;
-    color = color*(1/control.y)+texture(otherFrame, texcoord)*((control.y-1)/control.y);
+    color = color*(1.f/control.y)+texture(otherFrame, texcoord)*((control.y-1.f)/control.y);
 }

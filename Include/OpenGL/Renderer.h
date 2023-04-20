@@ -16,7 +16,6 @@ namespace Z {
 			int width=800;
 			int height=600;
 			const char* title;
-			uint32_t maxBufferSize{};
 
 			bool fullScreen=false;
 			bool vsync=false;

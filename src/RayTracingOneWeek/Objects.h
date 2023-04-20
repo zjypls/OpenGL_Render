@@ -10,17 +10,19 @@
 struct Sphere {
 	glm::vec4 center;
 	glm::vec4 color{1,1,1,1.f};
+	glm::ivec4 info{1,0,0,0};
 };
 struct Face {
 	glm::vec4 v0, v1, v2,v3;
 	glm::vec4 minV, maxV;
 	glm::vec4 normal;
 	glm::vec4 color{1,1,1,1.f};
+	glm::ivec4 info{1,0,0,0};
 };
 struct World{
-	Sphere spheres[2];
+	Sphere spheres[3];
 	Face faces[2];
-	glm::vec4 count{2,2,0,0};
+	glm::vec4 count{3,2,0,0};
 };
 
 
