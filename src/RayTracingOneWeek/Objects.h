@@ -20,9 +20,9 @@ struct Face {
 	glm::ivec4 info{1,0,0,0};
 };
 struct World{
-	Sphere spheres[3];
+	Sphere spheres[6];
 	Face faces[2];
-	glm::vec4 count{3,2,0,0};
+	glm::vec4 count{6,2,0,0};
 };
 
 

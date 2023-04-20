@@ -10,42 +10,27 @@
 #include "OpenGL/UniformBuffer.h"
 
 struct CameraData {
-	glm::vec4 horizon;
-	glm::vec4 vertical;
-	glm::vec4 origin;
-	glm::vec4 direction;
+	glm::vec4 horizon, vertical, origin, direction;
 	glm::ivec4 control;
 };
 
-Z::Camera camera{{1, .75, 0}, {0, 0, 0}, 90, 800.0f / 600.0f, 0.1f, 100.0f, 1};
+Z::Camera camera{{12, 1.75, 0}, {0, 0, 0}, 90, 800.0f / 600.0f, 0.1f, 100.0f, 1};
 glm::vec2 g_viewportSize{800, 600};
 World world{
-		{Sphere{{-.5, 1, -1.5, 1}, {.8, .5, .3, 1}},Sphere{{-.8, 1, 1.3, 1}, {.7, .1, .8, 1},{2,0,0,0}}, Sphere{{-1, -100, 0, 100}, {.9, .9, .9, 1}}},
-		{Face{{1,  -1,     1,  0},
-		      {1,  -1,     -1, 0},
-		      {-1, -1,     -1, 0},
-		      {-1, -1,     1,  0},
-		      {-1, -1.005, -1, 0},
-		      {1,  -.995,  1,  0},
-		      {0,  1,      0,  0},
-		      {.8, .5,     .3, 1}},
-		 Face{{1,  1.5,   1,  0},
-		      {1,  1.5,   -1, 0},
-		      {-1, 1.5,   -1, 0},
-		      {-1, 1.5,   1,  0},
-		      {-1, 1.495, -1, 0},
-		      {1,  1.505, 1,  0},
-		      {0,  1,     0,  0},
-		      {.9, .7,    .1, 1}}}
+		{Sphere{{-.5, 1,  -1.7, 1},{.8,  .5, .3,   1}},
+		Sphere{{-.8, 1,  1.3, 1},{.7,  .1, .8,  1},{2,   0,  0,   0}},
+		Sphere{{.8, .7, -.3, .7},{.9, .9, .9,  1},{3,  70, 0,   0}},
+		Sphere{{.8, 4.7, -.3, 1.2},{.9, .9, .9,  1},{5,  0, 0,   0}},
+		Sphere{{1.8, .5, .8, .5},{.5, .1, .9,  1},{4,  70, 20,   0}},
+		Sphere{{-1, -100, 0,  100},{.9, .9,.9, 1}}},
+		{Face{{1,  -1,     1,  0},{1,  -1,     -1, 0},{-1, -1,     -1, 0},{-1, -1,     1,  0},{-1, -1.005, -1, 0},{1,  -.995,  1,  0},{0,  1,      0,  0},{.8, .5,     .3, 1}},
+		  Face{{1,  1.5,   1,  0},{1,  1.5,   -1, 0},{-1, 1.5,   -1, 0},{-1, 1.5,   1,  0},{-1, 1.495, -1, 0},{1,  1.505, 1,  0},{0,  1,     0,  0},{.9, .7,    .1, 1}}}
 };
 
 int main() {
-	CameraData cameraData{
-			glm::vec4{0, 0, -1, 0} * (g_viewportSize.x / 200.f),
-			glm::vec4{0, 1, 0, 0} * (g_viewportSize.y / 200.f),
-			{1, .75, 0, 0},
-			{-1, 0, 0, 2},
-			{10.f, 1, 800, 600}};
+	CameraData cameraData{glm::vec4{0, 0, -1, 0} * (g_viewportSize.x / 200.f),
+	                      glm::vec4{0, 1, 0, 0} * (g_viewportSize.y / 200.f),
+	                      {12, .75, 0, 0}, {-1, 0, 0, 12}, {10.f, 1, 800, 600}};
 	Z::RenderSpec spec{};
 	spec.title = "Ray Tracing in One Weekend";
 	Z::Renderer::Init(spec);
@@ -119,11 +104,11 @@ int main() {
 		ImGui::Begin("Setting");
 		ImGui::Text("FPS: %.2f", fps);
 		ImGui::Text("Delta Time: %.3f ms", deltaTime);
-		if (ImGui::SliderFloat("Distance", &cameraData.direction.w, .5, 10)) {
+		if (ImGui::SliderFloat("Distance", &cameraData.direction.w, .5, 20)) {
 			frameCount = 0;
 			cameraDataBuffer.SetData(&cameraData, sizeof(CameraData));
 		}
-		if (ImGui::DragFloat3("Origin", &cameraData.origin.x, 0.1, -10, 10)) {
+		if (ImGui::DragFloat3("Origin", &cameraData.origin.x, 0.1, -100, 100)) {
 			frameCount = 0;
 			cameraDataBuffer.SetData(&cameraData, sizeof(CameraData));
 		}
