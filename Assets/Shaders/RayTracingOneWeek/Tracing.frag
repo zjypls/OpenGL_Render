@@ -175,5 +175,6 @@ void main() {
         color.rgb/=color.rgb+vec3(1, 1, 1);
         color.rgb=pow(color.rgb, vec3(1.f/2.2f));
     }
-    color = color*(1.f/control.y)+texture(otherFrame, texcoord)*((control.y-1.f)/control.y);
+    color.rgb = color.rgb*(1.f/control.y)+texture(otherFrame, texcoord).rgb*((control.y-1.f)/control.y);
+    color.a=1;
 }
