@@ -29,6 +29,7 @@ namespace Z {
 		}
 
 		void SetUniform(const std::string&name,const float* matrix);
+		void SetUniform(const std::string&name,const int value);
 
 	private:
 		uint32_t id;

@@ -6,6 +6,7 @@
 #include "Texture.h"
 #include "stb/stb_image.h"
 namespace Z {
+	std::filesystem::path RootDir={Z_TEXTURE_PATH};
 	namespace Temp{
 		GLenum GetDataFormat(int cal){
 			switch(cal){
@@ -29,7 +30,7 @@ namespace Z {
 
 	Texture::Texture(std::filesystem::path path) {
 		int wid,hig,cal;
-		auto pixels=stbi_load(path.string().c_str(),&wid,&hig,&cal,0);
+		auto pixels=stbi_load((RootDir/path).string().c_str(),&wid,&hig,&cal,0);
 		assert(pixels);
 		width=wid,height=hig;
 		dataFormat=Temp::GetDataFormat(cal);

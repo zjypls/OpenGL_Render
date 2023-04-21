@@ -51,4 +51,9 @@ namespace Z {
 		glUniformMatrix4fv(location,1,GL_FALSE,matrix);
 	}
 
+	void Shader::SetUniform(const std::string &name, const int value) {
+		auto location=glGetUniformLocation(id,name.c_str());
+		glUniform1i(location,value);
+	}
+
 }

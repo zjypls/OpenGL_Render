@@ -66,6 +66,8 @@ namespace Z {
 
 		const uint32_t GetID() const { return id; }
 
+		void ShotFrame(const std::string& path);
+
 		void Resize(uint32_t width, uint32_t height);
 
 		template<class T>

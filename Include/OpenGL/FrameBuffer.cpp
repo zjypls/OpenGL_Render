@@ -1,10 +1,10 @@
 //
 // Created by 32725 on 2023/4/14.
 //
-
+#define STB_IMAGE_WRITE_IMPLEMENTATION
 #include <cassert>
 #include "FrameBuffer.h"
-
+#include "stb/stb_image_write.h"
 namespace Z {
 	FrameBuffer::FrameBuffer(const AttachmentSpec &attachments)
 			: width(attachments.width), height(attachments.height) {
@@ -97,5 +97,14 @@ namespace Z {
 		for(int i = 0; i < attachments.size(); ++i){
 			glBindTextureUnit(i+index, attachments[i].id);
 		}
+	}
+
+	void FrameBuffer::ShotFrame(const std::string &path) {
+		Bind();
+		stbi_flip_vertically_on_write(true);
+		std::vector<uint8_t> data(width*height*4);
+		glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, data.data());
+		Unbind();
+		stbi_write_png(path.c_str(), width, height, 4, data.data(), width*4);
 	}
 }

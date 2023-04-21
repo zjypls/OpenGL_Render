@@ -6,5 +6,6 @@
 Lib
 build
 *.dll
+Bin/*.png
 cmake-build-debug
 cmake-build-release

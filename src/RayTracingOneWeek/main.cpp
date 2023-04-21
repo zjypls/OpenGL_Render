@@ -20,12 +20,13 @@ World world{
 		{Sphere{{-.5, 1,  -1.7, 1},{.8,  .5, .3,   1}},
 		Sphere{{-.8, 1,  1.3, 1},{.7,  .1, .8,  1},{2,   0,  0,   0}},
 		Sphere{{.8, .7, -.3, .7},{.9, .9, .9,  1},{3,  70, 0,   0}},
-		Sphere{{.8, 4.7, -.3, 1.2},{.9, .9, .9,  1},{5,  0, 0,   0}},
-		Sphere{{1.8, .5, .8, .5},{.5, .1, .9,  1},{4,  70, 20,   0}},
+		Sphere{{.8, 4.7, -.3, 1.2},{8., 13., 5.,  1},{5,  0, 0,   0}},
+		Sphere{{1.8, .4, .8, .5},{.7, .1, .9,  1},{4,  70, 20,   0}},
 		Sphere{{-1, -100, 0,  100},{.9, .9,.9, 1}}},
 		{Face{{1,  -1,     1,  0},{1,  -1,     -1, 0},{-1, -1,     -1, 0},{-1, -1,     1,  0},{-1, -1.005, -1, 0},{1,  -.995,  1,  0},{0,  1,      0,  0},{.8, .5,     .3, 1}},
 		  Face{{1,  1.5,   1,  0},{1,  1.5,   -1, 0},{-1, 1.5,   -1, 0},{-1, 1.5,   1,  0},{-1, 1.495, -1, 0},{1,  1.505, 1,  0},{0,  1,     0,  0},{.9, .7,    .1, 1}}}
 };
+
 
 int main() {
 	CameraData cameraData{glm::vec4{0, 0, -1, 0} * (g_viewportSize.x / 200.f),
@@ -39,6 +40,8 @@ int main() {
 	RayShader.AddShader("RayTracingOneWeek/Quad.vert", GL_VERTEX_SHADER);
 	RayShader.AddShader("RayTracingOneWeek/Tracing.frag", GL_FRAGMENT_SHADER);
 	RayShader.Link();
+	RayShader.Bind();
+	RayShader.SetUniform("gameModel",0);
 
 	auto attachmentsSpec = Z::AttachmentSpec();
 	attachmentsSpec.attachments.push_back({GL_RGBA8, GL_COLOR_ATTACHMENT0});
@@ -50,6 +53,9 @@ int main() {
 	auto worldDataBuffer = Z::UniformBuffer(&world, sizeof(World));
 
 	uint32_t frameCount = 1;
+	auto jupiter = std::make_shared<Z::Texture>("jupiter.jpg");
+	jupiter->Bind(1);
+	bool gamaCorrection = false;
 	while (Z::Renderer::Running()) {
 		Z::Timer::Update();
 
@@ -76,8 +82,7 @@ int main() {
 		Z::MyImGui::BeginDockSpace(viewport);
 		ImGui::Begin("##viewport", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoScrollbar);
 		ImGui::Image((void *) (frameCount % 2 ? beforeFrame.GetAttachment(0) : afterFrame.GetAttachment(0)),
-		             ImVec2(g_viewportSize.x, g_viewportSize.y), ImVec2(0, 1),
-		             ImVec2(1, 0));
+		             ImVec2(g_viewportSize.x, g_viewportSize.y), ImVec2(0, 1),ImVec2(1, 0));
 		if (auto viewSize = ImGui::GetWindowSize();viewSize.x != g_viewportSize.x || viewSize.y != g_viewportSize.y) {
 			frameCount = 0;
 			g_viewportSize = {viewSize.x, viewSize.y};
@@ -115,6 +120,13 @@ int main() {
 		if (ImGui::SliderInt("Depth", &cameraData.control.x, 2, 50)) {
 			frameCount = 0;
 			cameraDataBuffer.SetData(&cameraData, sizeof(CameraData));
+		}
+		if(ImGui::Button("Screen Shot")){
+			frameCount%2?beforeFrame.ShotFrame("shots.png"):afterFrame.ShotFrame("shots.png");
+		}
+		if(ImGui::Checkbox("Gama Correction",&gamaCorrection)){
+			frameCount = 0;
+			RayShader.SetUniform("gamaMode",gamaCorrection);
 		}
 		ImGui::End();
 		ImGui::PopStyleVar(3);

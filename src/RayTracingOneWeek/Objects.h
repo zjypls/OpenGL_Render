@@ -10,7 +10,7 @@
 struct Sphere {
 	glm::vec4 center;
 	glm::vec4 color{1,1,1,1.f};
-	glm::ivec4 info{1,0,0,0};
+	glm::ivec4 info{1,0,0,1};
 };
 struct Face {
 	glm::vec4 v0, v1, v2,v3;
