@@ -107,9 +107,9 @@ namespace Z{
 	Model::~Model() {
 	}
 
-	void Model::Draw(Shader&shader) const {
-		shader.Bind();
-		shader.SetUniform("model",&modelMatrix[0][0]);
+	void Model::Draw(std::shared_ptr<Shader>&shader) const {
+		shader->Bind();
+		shader->SetUniform("model",&modelMatrix[0][0]);
 		for(int i=0;i<textures.size();i++){
 			textures[i]->Bind(i);
 		}

@@ -56,4 +56,17 @@ namespace Z {
 		glUniform1i(location,value);
 	}
 
+	std::shared_ptr<Shader>
+	Shader::Create(const std::initializer_list<std::string> &src, const std::initializer_list<GLenum> &types) {
+		assert(src.size()<=types.size());
+		auto shader=std::make_shared<Shader>();
+		auto srcIt=src.begin();
+		auto typeIt=types.begin();
+		for(;srcIt!=src.end();++srcIt,++typeIt){
+			shader->AddShader(*srcIt,*typeIt);
+		}
+		shader->Link();
+		return shader;
+	}
+
 }

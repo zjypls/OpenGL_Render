@@ -29,7 +29,7 @@ namespace Z{
 		auto size()const { return vertexes.size(); }
 		auto begin() { return vertexes.begin(); }
 		auto end() { return vertexes.end(); }
-		void Draw(Shader&shader) const;
+		void Draw(std::shared_ptr<Shader>&shader) const;
 	private:
 		void LoadTexture(const std::filesystem::path& path);
 		static std::filesystem::path modelRootPath;

@@ -59,17 +59,10 @@ int main() {
 	Z::MyImGui::Init();
 
 	auto QuadArray = Z::Renderer::GetQuadVertexArray();
+	auto SamplerShader = Z::Shader::Create({"PBR/Sampler.vert", "PBR/Sampler.frag"});
+	auto LightComputeShader = Z::Shader::Create({"PBR/Light.vert", "PBR/Light.frag"});
+	auto PostProcessShader = Z::Shader::Create({"PBR/PostProcess.vert", "PBR/PostProcess.frag"});
 
-	Z::Shader SamplerShader{}, LightComputeShader{}, PostProcessShader{};
-	SamplerShader.AddShader("PBR/Sampler.vert", GL_VERTEX_SHADER);
-	SamplerShader.AddShader("PBR/Sampler.frag", GL_FRAGMENT_SHADER);
-	SamplerShader.Link();
-	LightComputeShader.AddShader("PBR/Light.vert", GL_VERTEX_SHADER);
-	LightComputeShader.AddShader("PBR/Light.frag", GL_FRAGMENT_SHADER);
-	LightComputeShader.Link();
-	PostProcessShader.AddShader("PBR/PostProcess.vert", GL_VERTEX_SHADER);
-	PostProcessShader.AddShader("PBR/PostProcess.frag", GL_FRAGMENT_SHADER);
-	PostProcessShader.Link();
 
 	Z::UniformBuffer CameraDataUniformBuffer{sizeof(glm::mat4)}, LightDataUniformBuffer{&lightData, sizeof(LightData)};
 	Z::UniformBuffer postProcessUbo{&postProcessData, sizeof(PostProcessData)};
@@ -132,20 +125,19 @@ int main() {
 		LightViewFrame.Bind();
 		Z::Renderer::SetClearValue({0.f, 0.f, 0.f, 1.0f});
 		firstSampleFrame.BindAttachment();
-		LightComputeShader.Bind();
+		LightComputeShader->Bind();
 		QuadArray->Draw();
 		LightViewFrame.Unbind();
 		Z::Renderer::SetClearValue({0.1f, 0.1f, 0.1f, 1.0f});
 		postProcessFrame.Bind();
-		PostProcessShader.Bind();
+		PostProcessShader->Bind();
 		LightViewFrame.BindAttachment();
 		QuadArray->Draw();
 		postProcessFrame.Unbind();
 
 		ImGui::Begin("##View", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoScrollbar);
 		ImGui::Image((void *) postProcessFrame.GetAttachment(0), ImVec2(g_viewportSize.x, g_viewportSize.y),
-		             ImVec2(0, 1),
-		             ImVec2(1, 0));
+		             ImVec2(0, 1),ImVec2(1, 0));
 		Z::Guizmo::Init(ImGui::GetWindowPos(), ImGui::GetWindowSize());
 		viewPortHovered = ImGui::IsWindowHovered();
 		viewPortFocused = ImGui::IsWindowFocused();
@@ -164,7 +156,6 @@ int main() {
 		if (ModelIndex.x != -1 && ModelIndex.y != -1 && ModelIndex.x < models.size()) {
 			Z::Guizmo::DrawGuizmo(camera.viewMatrix, camera.projectionMatrix, models[ModelIndex.x]->GetModelMatrix());
 		}
-
 
 		ImGui::PopStyleVar(3);
 
@@ -191,7 +182,6 @@ int main() {
 		ImGui::Text("Scroll to change focus distance");
 
 		ImGui::End();
-
 		ImGui::End();
 		Z::MyImGui::End();
 

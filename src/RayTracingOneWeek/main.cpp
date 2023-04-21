@@ -14,12 +14,12 @@ struct CameraData {
 	glm::ivec4 control;
 };
 
-Z::Camera camera{{12, 1.75, 0}, {0, 0, 0}, 90, 800.0f / 600.0f, 0.1f, 100.0f, 1};
+Z::Camera camera{{12, 2, 0}, {0, 0, 0}, 90, 800.0f / 600.0f, 0.1f, 100.0f, 1};
 glm::vec2 g_viewportSize{800, 600};
 World world{
 		{Sphere{{-.5, 1,  -1.7, 1},{.8,  .5, .3,   1}},
 		Sphere{{-.8, 1,  1.3, 1},{.7,  .1, .8,  1},{MIRROR,   0,  0,   0}},
-		Sphere{{.8, .7, -.3, .7},{.9, .9, .9,  1},{FOG,  50, 0,   0}},
+		Sphere{{.8, .7, -.3, .7},{.9, .9, .9,  1},{FOG,  45, 0,   0}},
 		Sphere{{1.3, 1.5, .5, .5},{.9, .9, .9,  1},{GLASS,  50, 0,   0}},
 		Sphere{{.8, 4.7, -.3, 1.2},{8., 13., 5.,  1},{LIGHT,  0, 0,   0}},
 		Sphere{{1.8, .48, .8, .5},{.7, .1, .9,  1},{META,  70, 20,   0}},
@@ -32,17 +32,14 @@ World world{
 int main() {
 	CameraData cameraData{glm::vec4{0, 0, -1, 0} * (g_viewportSize.x / 200.f),
 	                      glm::vec4{0, 1, 0, 0} * (g_viewportSize.y / 200.f),
-	                      {12, .75, 0, 0}, {-1, 0, 0, 12}, {10.f, 1, 800, 600}};
+	                      {12, 2, 0, 0}, {-1, 0, 0, 20}, {10.f, 1, 800, 600}};
 	Z::RenderSpec spec{};
 	spec.title = "Ray Tracing in One Weekend";
 	Z::Renderer::Init(spec);
 	Z::MyImGui::Init();
-	auto RayShader = Z::Shader{};
-	RayShader.AddShader("RayTracingOneWeek/Quad.vert", GL_VERTEX_SHADER);
-	RayShader.AddShader("RayTracingOneWeek/Tracing.frag", GL_FRAGMENT_SHADER);
-	RayShader.Link();
-	RayShader.Bind();
-	RayShader.SetUniform("gameModel",0);
+	auto RayShader=Z::Shader::Create({"RayTracingOneWeek/Quad.vert", "RayTracingOneWeek/Tracing.frag"});
+	RayShader->Bind();
+	RayShader->SetUniform("gamaMode", 0);
 
 	auto attachmentsSpec = Z::AttachmentSpec();
 	attachmentsSpec.attachments.push_back({GL_RGBA8, GL_COLOR_ATTACHMENT0});
@@ -73,7 +70,7 @@ int main() {
 		Z::MyImGui::Begin();
 		cameraDataBuffer.Bind(0);
 		worldDataBuffer.Bind(1);
-		RayShader.Bind();
+		RayShader->Bind();
 		QuadArray->Draw();
 		Z::Renderer::BindDefaultFrameBuffer();
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
@@ -127,7 +124,7 @@ int main() {
 		}
 		if(ImGui::Checkbox("Gama Correction",&gamaCorrection)){
 			frameCount = 0;
-			RayShader.SetUniform("gamaMode",gamaCorrection);
+			RayShader->SetUniform("gamaMode",gamaCorrection);
 		}
 		ImGui::End();
 		ImGui::PopStyleVar(3);
