@@ -4,10 +4,12 @@
 #define GLASS 3
 #define META 4
 #define LIGHT 5
+#define FOG 6
 struct Ray{ vec3 origin;vec3 direction; };
 struct Sphere{ vec4 center;vec4 color;ivec4 info; };
 struct Plane{ vec4 v0, v1, v2, v3, minV, maxV;vec4 normal;vec4 color;ivec4 info; };
 //Info.x:type,Info.y:eta,Info.z:glossy ,info.w:texID
+//if type==FOG,Info.y: fog thickness
 struct HitRecord{ float t;vec3 p;vec3 normal;vec4 color;ivec4 Info;float RefrectRatio; };
 layout(location=0)out vec4 color;
 layout(location=0)in vec2 texcoord;
@@ -15,7 +17,7 @@ layout(binding=0)uniform sampler2D otherFrame;
 layout(binding=1)uniform sampler2D Textures[6];
 layout(binding=0) uniform Data{ vec4 horizon;vec4 vertical;vec4 origin;vec4 direction;ivec4 control; };
 layout(binding=1)uniform World{
-    Sphere spheres[6];
+    Sphere spheres[7];
     Plane planes[2];
     vec4 count;
 };
@@ -54,13 +56,26 @@ void HitSphere(in Sphere sphere, inout Ray ray, inout HitRecord record){
     float c=dot(oc, oc)-sphere.center.w*sphere.center.w;
     float discriminant=b*b-a*c;
     if (discriminant>0){
-        float t=(-b-sqrt(discriminant))/a;
+        discriminant=sqrt(discriminant);
+        float t=(-b-discriminant)/a;
         if (t<record.t&&t>0.001){
-            record.t=t;
-            record.p=ray.origin+t*ray.direction;
-            record.normal=(record.p-sphere.center.xyz)/sphere.center.w;
-            record.color=sphere.color;
-            record.Info=sphere.info;
+            if(sphere.info.x==FOG){
+                float len=discriminant/(2*a);
+                float tl=(sphere.info.y/100.f)*Random();
+                if(tl>len){
+                    return;
+                }else{
+                    record.t=t+tl;
+                    record.color=sphere.color;
+                    record.Info=sphere.info;
+                }
+            }else{
+                record.t=t;
+                record.p=ray.origin+t*ray.direction;
+                record.normal=(record.p-sphere.center.xyz)/sphere.center.w;
+                record.color=sphere.color;
+                record.Info=sphere.info;
+            }
         }
     }
 }
@@ -122,9 +137,14 @@ void ProcessResult(inout Ray ray, inout HitRecord record){
         record.RefrectRatio=.97;
         break;
         case META:
-        ray.direction=reflect(ray.direction, record.normal)+GetRandomVec(vec3(0, 0, 0))*(record.Info.z/100.f);//add a vector to make a glossy effect
+        ray.direction=reflect(ray.direction, record.normal)+GetRandomVec(record.normal)*(record.Info.z/100.f);//add a vector to make a glossy effect
         ray.origin=record.p;
         record.RefrectRatio=.85;
+        break;
+        case FOG:
+        ray.origin=ray.origin+ray.direction*record.t;
+        ray.direction=GetRandomVec(ray.direction);
+        record.RefrectRatio=.55;
         break;
     }
     if (record.Info.w!=0){
@@ -140,7 +160,7 @@ vec4 GetColor(Ray ray){
     vec4 Color=vec4(1, 1, 1, 1);
     while (HitWorld(ray, record)){
         if (--depth<0)
-            return vec4(0, 0, 0, 0);
+        return vec4(0, 0, 0, 0);
         if (record.Info.x==LIGHT){
             return record.color*Color;
         }

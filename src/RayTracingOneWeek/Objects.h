@@ -6,23 +6,29 @@
 #define OPENGL_RENDER_OBJECTS_H
 
 #include "glm/glm/glm.hpp"
+#define LAMBERT 1
+#define MIRROR 2
+#define GLASS 3
+#define META 4
+#define LIGHT 5
+#define FOG 6
 
 struct Sphere {
 	glm::vec4 center;
 	glm::vec4 color{1,1,1,1.f};
-	glm::ivec4 info{1,0,0,1};
+	glm::ivec4 info{LAMBERT,0,0,1};
 };
 struct Face {
 	glm::vec4 v0, v1, v2,v3;
 	glm::vec4 minV, maxV;
 	glm::vec4 normal;
 	glm::vec4 color{1,1,1,1.f};
-	glm::ivec4 info{1,0,0,0};
+	glm::ivec4 info{LAMBERT,0,0,0};
 };
 struct World{
-	Sphere spheres[6];
+	Sphere spheres[7];
 	Face faces[2];
-	glm::vec4 count{6,2,0,0};
+	glm::vec4 count{7,2,0,0};
 };
 
 
