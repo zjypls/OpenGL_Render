@@ -139,6 +139,8 @@ vec4 GetColor(Ray ray){
     record.t=1E3;
     vec4 Color=vec4(1, 1, 1, 1);
     while (HitWorld(ray, record)){
+        if (--depth<0)
+            return vec4(0, 0, 0, 0);
         if (record.Info.x==LIGHT){
             return record.color*Color;
         }
@@ -153,7 +155,7 @@ vec4 GetColor(Ray ray){
 }
 void main() {
 
-    if(control.y>700){
+    if (control.y>700){
         color=texture(otherFrame, texcoord);
         return;
     }

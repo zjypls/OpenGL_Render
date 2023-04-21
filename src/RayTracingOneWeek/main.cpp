@@ -117,7 +117,7 @@ int main() {
 			frameCount = 0;
 			cameraDataBuffer.SetData(&cameraData, sizeof(CameraData));
 		}
-		if (ImGui::SliderInt("Depth", &cameraData.control.x, 2, 50)) {
+		if (ImGui::SliderInt("Depth", &cameraData.control.x, 1, 50)) {
 			frameCount = 0;
 			cameraDataBuffer.SetData(&cameraData, sizeof(CameraData));
 		}
