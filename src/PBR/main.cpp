@@ -183,6 +183,9 @@ int main() {
 		ImGui::Combo("Light", &CurrentLightIndex, "Light0\0Light1\0Light2\0Light3\0Light4\0");
 		ImGui::DragFloat4("LightPos", &lightData.lightPos[CurrentLightIndex][0], .1f);
 		ImGui::DragFloat4("LightCol", &lightData.lightCol[CurrentLightIndex][0], .1f);
+		if(ImGui::Button("Screen Shot")){
+			postProcessFrame.ShotFrame("PBR_Shot.png");
+		}
 		ImGui::Text("Right Mouse Button to rotate camera");
 		ImGui::Text("Middle Mouse Button to pick model and show guizmo");
 		ImGui::Text("Scroll to change focus distance");
