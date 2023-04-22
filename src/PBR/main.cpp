@@ -8,6 +8,7 @@
 #include "OpenGL/Timer.h"
 #include "OpenGL/MyImGui.h"
 #include "OpenGL/Guizmo.h"
+#include "ModelPBR.h"
 #include <thread>
 #include <iostream>
 
@@ -60,8 +61,8 @@ int main() {
 
 	auto QuadArray = Z::Renderer::GetQuadVertexArray();
 	auto SamplerShader = Z::Shader::Create({"PBR/Sampler.vert", "PBR/Sampler.frag"});
-	auto LightComputeShader = Z::Shader::Create({"PBR/Light.vert", "PBR/Light.frag"});
-	auto PostProcessShader = Z::Shader::Create({"PBR/PostProcess.vert", "PBR/PostProcess.frag"});
+	auto LightComputeShader = Z::Shader::Create({"Common/Quad.vert", "PBR/Light.frag"});
+	auto PostProcessShader = Z::Shader::Create({"Common/Quad.vert", "PBR/PostProcess.frag"});
 
 
 	Z::UniformBuffer CameraDataUniformBuffer{sizeof(glm::mat4)}, LightDataUniformBuffer{&lightData, sizeof(LightData)};
@@ -85,7 +86,7 @@ int main() {
 	auto firstSampleFrame = Z::FrameBuffer(attachmentsSpec);
 
 	std::vector<std::shared_ptr<Z::Model>> models;
-	models.emplace_back(std::make_shared<Z::Model>("lighter/lighter.fbx"));
+	models.emplace_back(std::make_shared<ModelPBR>("lighter/lighter.fbx"));
 
 	auto walkControl = std::thread{Z::Camera::Walk, window};
 	static bool viewPortHovered = false, viewPortFocused = false;

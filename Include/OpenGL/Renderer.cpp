@@ -48,8 +48,7 @@ namespace Z {
 		auto vertexBuffer = std::make_shared<VertexBuffer>(QuadVertexes, sizeof(QuadVertexes));
 		vertexBuffer->SetLayout(QuadDefaultLayout);
 		auto indexBuffer = std::make_shared<IndexBuffer>(QuadIndices, sizeof(QuadIndices));
-		return std::make_shared<VertexArray>(std::initializer_list<std::shared_ptr<VertexBuffer>>{vertexBuffer},
-		                                     indexBuffer);
+		return std::make_shared<VertexArray>(vertexBuffer,indexBuffer);
 	}
 
 	bool Renderer::Running() {

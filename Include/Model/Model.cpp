@@ -9,26 +9,12 @@
 #include "Model.h"
 namespace Z{
 	static std::string texturesName[6]{"ao","base","depth","meta","normal","rough"};
-	struct Vertex{
-		glm::vec3 position;
-		glm::vec3 normal;
-		glm::vec2 texCoord;
-		glm::vec3 tangent;
-		glm::vec3 bitangent;
-		glm::ivec2 Index;
-	};
+
 	//using namespace Assimp;
 	std::filesystem::path Model::modelRootPath = std::filesystem::path(Z_MODULE_SOURCE_DIR);
-	static BufferLayout layout = {
-			BufferLayout::Element{"Pos",GL_FLOAT,3,sizeof(float),false,0},
-			BufferLayout::Element{"Normal",GL_FLOAT,3,sizeof(float),false,sizeof(float)*3},
-			BufferLayout::Element{"TexCoord",GL_FLOAT,2,sizeof(float),false,sizeof(float)*6},
-			BufferLayout::Element{"Tangent",GL_FLOAT,3,sizeof(float),false,sizeof(float)*8},
-			BufferLayout::Element{"Bitangent",GL_FLOAT,3,sizeof(float),false,sizeof(float)*11},
-			BufferLayout::Element{"Index",GL_INT,2,sizeof(int),false,sizeof(float)*14}
-	};
 
-	Model::Model(const std::string &path,const glm::vec3&position,int index):offset(position),Index(index) {
+
+	Model::Model(const std::string &path,int index,const glm::vec3&position):offset(position),Index(index) {
 		LoadModel(path);
 		auto dir=path.substr(0,path.rfind('/')+1)+"Textures/";
 		for(std::string& name:texturesName){
@@ -58,8 +44,6 @@ namespace Z{
 	}
 
 	void Model::ProcessMesh(aiMesh *mesh, const aiScene *scene) {
-		std::vector<Vertex> vertices;
-		std::vector<uint32_t> indices;
 		int index = 0;
 		for (uint32_t i = 0; i < mesh->mNumVertices; i++) {
 			Vertex vertex{};
@@ -95,28 +79,28 @@ namespace Z{
 				indices.push_back(face.mIndices[j]);
 			}
 		}
-		auto vertexBuffer=std::make_shared<VertexBuffer>(vertices.data(), vertices.size() * sizeof(Vertex));
-		vertexBuffer->SetLayout(layout);
-		auto indexBuffer=std::make_shared<IndexBuffer>(indices.data(), indices.size());
-		auto vertexArray=std::make_shared<VertexArray>();
-		vertexArray->AddVertexBuffer(vertexBuffer);
-		vertexArray->SetIndexBuffer(indexBuffer);
-		vertexes.push_back(vertexArray);
+//		auto vertexBuffer=std::make_shared<VertexBuffer>(vertices.data(), vertices.size() * sizeof(Vertex));
+//		vertexBuffer->SetLayout(layout);
+//		auto indexBuffer=std::make_shared<IndexBuffer>(indices.data(), indices.size());
+//		auto vertexArray=std::make_shared<VertexArray>();
+//		vertexArray->AddVertexBuffer(vertexBuffer);
+//		vertexArray->SetIndexBuffer(indexBuffer);
+//		vertexes.push_back(vertexArray);
 	}
 
 	Model::~Model() {
 	}
 
-	void Model::Draw(std::shared_ptr<Shader>&shader) const {
-		shader->Bind();
-		shader->SetUniform("model",&modelMatrix[0][0]);
-		for(int i=0;i<textures.size();i++){
-			textures[i]->Bind(i);
-		}
-		for (auto& vertex : vertexes) {
-			vertex->Draw();
-		}
-	}
+//	void Model::Draw(std::shared_ptr<Shader>&shader) const {
+//		shader->Bind();
+//		shader->SetUniform("model",&modelMatrix[0][0]);
+//		for(int i=0;i<textures.size();i++){
+//			textures[i]->Bind(i);
+//		}
+//		for (auto& vertex : vertexes) {
+//			vertex->Draw();
+//		}
+//	}
 
 	void Model::LoadTexture(const std::filesystem::path& path) {
 		auto texture = std::make_shared<Texture>(path.string());

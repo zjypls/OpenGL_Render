@@ -60,7 +60,7 @@ namespace Z {
 	class VertexArray {
 	public:
 		VertexArray();
-		VertexArray(const std::initializer_list<std::shared_ptr<VertexBuffer>>& vertexBuffers, const std::shared_ptr<IndexBuffer>& indexBuffer);
+		VertexArray(std::shared_ptr<VertexBuffer>& vertexBuffer, const std::shared_ptr<IndexBuffer>& indexBuffer);
 		void Bind() const{glBindVertexArray(id);vertexBuffers[0]->Bind();indexBuffer->Bind();}
 		void Unbind() const{glBindVertexArray(0);}
 		void AddVertexBuffer(const std::shared_ptr<VertexBuffer>& vb);

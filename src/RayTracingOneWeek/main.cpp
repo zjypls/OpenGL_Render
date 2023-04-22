@@ -37,7 +37,7 @@ int main() {
 	spec.title = "Ray Tracing in One Weekend";
 	Z::Renderer::Init(spec);
 	Z::MyImGui::Init();
-	auto RayShader=Z::Shader::Create({"RayTracingOneWeek/Quad.vert", "RayTracingOneWeek/Tracing.frag"});
+	auto RayShader=Z::Shader::Create({"Common/Quad.vert", "RayTracingOneWeek/Tracing.frag"});
 	RayShader->Bind();
 	RayShader->SetUniform("gamaMode", 0);
 

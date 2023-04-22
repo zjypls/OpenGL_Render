@@ -3,6 +3,13 @@
 //
 
 #include "UniformBuffer.h"
+#include <iostream>
+#include <cassert>
+#define CHECK_SIZE(size) {\
+    GLint max;\
+	glGetIntegerv(GL_MAX_UNIFORM_BLOCK_SIZE, &max);\
+	assert(size <= max);\
+}
 
 namespace Z{
 
@@ -11,6 +18,7 @@ namespace Z{
 	}
 
 	UniformBuffer::UniformBuffer(const void *data, size_t size) {
+		CHECK_SIZE(size);
 		glCreateBuffers(1, &id);
 		glBindBuffer(GL_UNIFORM_BUFFER, id);
 		glBufferData(GL_UNIFORM_BUFFER, size, data, GL_DYNAMIC_COPY);
@@ -21,11 +29,13 @@ namespace Z{
 	}
 
 	void UniformBuffer::SetData(const void *data, size_t size) {
+		CHECK_SIZE(size);
 		glBindBuffer(GL_UNIFORM_BUFFER, id);
 		glBufferData(GL_UNIFORM_BUFFER, size, data, GL_DYNAMIC_COPY);
 	}
 
 	UniformBuffer::UniformBuffer(size_t size) {
+		CHECK_SIZE(size);
 		glCreateBuffers(1, &id);
 		glBindBuffer(GL_UNIFORM_BUFFER, id);
 		glBufferData(GL_UNIFORM_BUFFER, size, nullptr, GL_DYNAMIC_COPY);
