@@ -9,3 +9,5 @@ build
 Bin/*.png
 cmake-build-debug
 cmake-build-release
+Bin/imgui.ini
+*.ini

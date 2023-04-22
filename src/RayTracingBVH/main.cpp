@@ -21,7 +21,7 @@ int main(){
 		glm::vec4{0,0,-4,0},
 		glm::vec4{0,3,0,0},
 		glm::vec4{1,0,0,0},
-		glm::vec4{-1,0,0,2},
+		glm::vec4{-1,0,0,1},
 		glm::vec4{800,600,0,0}
 	};
 	Z::RenderSpec spec;

@@ -34,7 +34,7 @@ bool HitAABB(Ray ray, vec3 Min, vec3 Max, out float tmin, out float tmax) {
 void main() {
     Ray ray;
     ray.origin = cameraPosition.xyz;
-    ray.direction = normalize(cameraRight.xyz * uv.x + cameraUp.xyz * uv.y + cameraDirection.xyz);
+    ray.direction = normalize(cameraRight.xyz * uv.x + cameraUp.xyz * uv.y + cameraDirection.xyz*cameraDirection.w);
     float tmin,tmax;
     if (HitAABB(ray,nodes[0].Min.xyz,nodes[0].Max.xyz,tmin,tmax))
         FragColor = vec4(1.0, 0.0, 0.0, 1.0);

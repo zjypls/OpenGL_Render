@@ -5,6 +5,7 @@
 #define META 4
 #define LIGHT 5
 #define FOG 6
+
 struct Ray{ vec3 origin;vec3 direction; };
 struct Sphere{ vec4 center;vec4 color;ivec4 info; };
 struct Plane{ vec4 v0, v1, v2, v3, minV, maxV;vec4 normal;vec4 color;ivec4 info; };
@@ -42,6 +43,12 @@ float Random(){
 }
 vec3 GetRandomVec(vec3 iNormal){
     return vec3(Random()*2-1, Random()*2-1, Random()*2-1)+iNormal;
+}
+// Christophe Schlick approximation
+float reflectance(float cosine, float ref_idx) {
+    float r0 = (1-ref_idx) / (1+ref_idx);
+    r0 = r0*r0;
+    return r0 + (1-r0)*pow((1 - cosine),5.0);
 }
 
 void getRay(vec2 UV, out Ray ray){
@@ -115,7 +122,7 @@ void ProcessResult(inout Ray ray, inout HitRecord record){
         break;
         case GLASS:
         float n=100.f/record.Info.y;
-        float cosi=clamp(-1, 1, dot(ray.direction, record.normal));
+        float cosi=dot(ray.direction, record.normal);
         float etai=1, etat=n;
         vec3 n1=record.normal;
         if (cosi<0){
@@ -127,11 +134,11 @@ void ProcessResult(inout Ray ray, inout HitRecord record){
         }
         float eta=etai/etat;
         float k=1-eta*eta*(1-cosi*cosi);
-        if (k<0){
+        if (k<0 || reflectance(cosi, eta)>Random() ){
             ray.direction=reflect(ray.direction, record.normal);
             ray.origin=record.p;
         } else {
-            ray.direction=normalize(eta*ray.direction+(eta*cosi-sqrt(k))*n1);
+            ray.direction=refract(ray.direction,record.normal,eta);//normalize(eta*ray.direction+(eta*cosi-sqrt(k))*n1);
             ray.origin=record.p;
         }
         record.RefrectRatio=.97;
