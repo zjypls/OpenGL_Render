@@ -17,7 +17,7 @@ const uint32_t QuadIndices[]{
 };
 
 Z::BufferLayout QuadDefaultLayout{{Z::BufferLayout::Element{"pos", GL_FLOAT, 3, sizeof(float), false, 0},
-                        {"tex", GL_FLOAT, 2, sizeof(uint32_t), false, 0}}};
+                                   {"tex", GL_FLOAT, 2, sizeof(uint32_t), false, 0}}};
 
 namespace Z {
 
@@ -48,7 +48,28 @@ namespace Z {
 		auto vertexBuffer = std::make_shared<VertexBuffer>(QuadVertexes, sizeof(QuadVertexes));
 		vertexBuffer->SetLayout(QuadDefaultLayout);
 		auto indexBuffer = std::make_shared<IndexBuffer>(QuadIndices, sizeof(QuadIndices));
-		return std::make_shared<VertexArray>(std::initializer_list<std::shared_ptr<VertexBuffer>>{vertexBuffer}, indexBuffer);
+		return std::make_shared<VertexArray>(std::initializer_list<std::shared_ptr<VertexBuffer>>{vertexBuffer},
+		                                     indexBuffer);
 	}
 
+	bool Renderer::Running() {
+		return !glfwWindowShouldClose(window);
+	}
+
+	void Renderer::BindDefaultFrameBuffer() {
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	}
+
+	void Renderer::Shutdown(){
+		glfwDestroyWindow(window);
+		glfwTerminate();
+	}
+
+	void Renderer::SwapBuffers()  { glfwSwapBuffers(window);glfwPollEvents(); }
+
+	void Renderer::SetClearValue(const vec4 &value) {
+		glClearColor(value.r,value.g,value.b,value.a);
+		glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+	}
 }

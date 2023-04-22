@@ -67,8 +67,6 @@ int main() {
 	Z::UniformBuffer CameraDataUniformBuffer{sizeof(glm::mat4)}, LightDataUniformBuffer{&lightData, sizeof(LightData)};
 	Z::UniformBuffer postProcessUbo{&postProcessData, sizeof(PostProcessData)};
 	Z::AttachmentSpec attachmentsSpec;
-	attachmentsSpec.width = 800;
-	attachmentsSpec.height = 600;
 	attachmentsSpec.attachments.push_back({GL_RGBA8, GL_COLOR_ATTACHMENT0});
 	auto postProcessFrame = Z::FrameBuffer(attachmentsSpec);
 	attachmentsSpec.attachments.pop_back();

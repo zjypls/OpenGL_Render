@@ -1,0 +1,6 @@
+cmake_minimum_required(VERSION 3.22)
+project(TracingBVH)
+link_directories(${CMAKE_SOURCE_DIR}/Lib)
+add_executable(${PROJECT_NAME} main.cpp)
+target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/Include)
+target_link_libraries(${PROJECT_NAME} PRIVATE OpenGLLib ImGui Camera Model)

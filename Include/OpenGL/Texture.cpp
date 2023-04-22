@@ -65,7 +65,6 @@ namespace Z {
 
 	void Texture::Unbind() const {
 		glBindTextureUnit(0,0);
-
 	}
 
 	void Texture::SetData(void *data, int size, int xOffset, int yOffset, GLenum dataFormat, GLenum dataType) {

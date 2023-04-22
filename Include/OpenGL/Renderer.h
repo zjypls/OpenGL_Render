@@ -25,22 +25,18 @@ namespace Z {
 		static RenderSpec Spec;
 	public:
 		static void Init(const RenderSpec&spec);
-		static bool Running() { return !glfwWindowShouldClose(window); }
+		static bool Running();
 		static auto GetWindow() { return window; }
-		static void BindDefaultFrameBuffer() { glBindFramebuffer(GL_FRAMEBUFFER, 0); }
+		static void BindDefaultFrameBuffer();
 
 		static void Draw(const std::shared_ptr<Model>& model,std::shared_ptr<Shader>&shader){model->Draw(shader);}
 		static void Draw(const std::shared_ptr<VertexArray>& vertexArray,Shader&shader){shader.Bind();vertexArray->Draw();}
 
-		static void Shutdown() {
-			glfwDestroyWindow(window);
-			glfwTerminate();
-		}
+		static void Shutdown() ;
 		static std::shared_ptr<VertexArray> GetQuadVertexArray();
-		static void SwapBuffers() { glfwSwapBuffers(window);glfwPollEvents(); }
+		static void SwapBuffers();
 
-		static void SetClearValue(const vec4&value) { glClearColor(value.x,value.y,value.z,value.w); glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT); }
-
+		static void SetClearValue(const vec4&value);
 		static glm::vec2 GetWindowSize();
 	};
 
