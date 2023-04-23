@@ -16,4 +16,13 @@ namespace Z{
 	float Timer::GetDeltaTime() {
 		return deltaTime;
 	}
+
+	float Timer::GetFPS() {
+		static float fps = 1.f/deltaTime;
+		if(lastTime - lastFlush > 1.f){
+			fps = 1.f/deltaTime;
+			lastFlush = lastTime;
+		}
+		return fps;
+	}
 }

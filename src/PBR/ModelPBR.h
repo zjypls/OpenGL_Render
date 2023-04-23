@@ -11,7 +11,7 @@ class ModelPBR : public Z::Model {
 	std::shared_ptr<Z::VertexArray> vertexArray;
 	void GenerateVertexArray();
 public:
-	ModelPBR(const std::string& path,int index=0,const glm::vec3&position=glm::vec3{0.f});
+	ModelPBR(const std::string& path,int index=0,bool loadTex=true,const glm::vec3&position=glm::vec3{0.f});
 	void Draw(std::shared_ptr<Z::Shader>&shader) const override;
 };
 

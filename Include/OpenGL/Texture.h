@@ -22,6 +22,14 @@ namespace Z {
 		GLenum iFormat,dataFormat;
 	};
 
+	class TextureBuffer{
+	public:
+		TextureBuffer(const void*data,size_t size,GLenum iFormat=GL_RGBA8);
+		void Bind(uint32_t slot=0)const;
+	private:
+		uint32_t id,tid;
+	};
+
 }
 
 #endif //RENDERER003_OGL_TEXTURE_H

@@ -28,6 +28,10 @@ World world{
 		  Face{{1,  1.5,   1,  0},{1,  1.5,   -1, 0},{-1, 1.5,   -1, 0},{-1, 1.5,   1,  0},{-1, 1.495, -1, 0},{1,  1.505, 1,  0},{0,  1,     0,  0},{.9, .7,    .1, 1}}}
 };
 
+extern "C" {
+__declspec(dllexport) unsigned long NvOptimusEnablement = 0x00000001;
+}
+
 
 int main() {
 	CameraData cameraData{glm::vec4{0, 0, -1, 0} * (g_viewportSize.x / 200.f),

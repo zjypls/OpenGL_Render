@@ -14,11 +14,13 @@ namespace Z{
 	std::filesystem::path Model::modelRootPath = std::filesystem::path(Z_MODULE_SOURCE_DIR);
 
 
-	Model::Model(const std::string &path,int index,const glm::vec3&position):offset(position),Index(index) {
+	Model::Model(const std::string &path,int index,bool loadTex,const glm::vec3&position):offset(position),Index(index) {
 		LoadModel(path);
-		auto dir=path.substr(0,path.rfind('/')+1)+"Textures/";
-		for(std::string& name:texturesName){
-			LoadTexture(modelRootPath.string()+dir+name+".png");
+		if(loadTex){
+			auto dir = path.substr(0, path.rfind('/') + 1) + "Textures/";
+			for (std::string &name: texturesName) {
+				LoadTexture(modelRootPath.string() + dir + name + ".png");
+			}
 		}
 	}
 
@@ -79,28 +81,10 @@ namespace Z{
 				indices.push_back(face.mIndices[j]);
 			}
 		}
-//		auto vertexBuffer=std::make_shared<VertexBuffer>(vertices.data(), vertices.size() * sizeof(Vertex));
-//		vertexBuffer->SetLayout(layout);
-//		auto indexBuffer=std::make_shared<IndexBuffer>(indices.data(), indices.size());
-//		auto vertexArray=std::make_shared<VertexArray>();
-//		vertexArray->AddVertexBuffer(vertexBuffer);
-//		vertexArray->SetIndexBuffer(indexBuffer);
-//		vertexes.push_back(vertexArray);
 	}
 
 	Model::~Model() {
 	}
-
-//	void Model::Draw(std::shared_ptr<Shader>&shader) const {
-//		shader->Bind();
-//		shader->SetUniform("model",&modelMatrix[0][0]);
-//		for(int i=0;i<textures.size();i++){
-//			textures[i]->Bind(i);
-//		}
-//		for (auto& vertex : vertexes) {
-//			vertex->Draw();
-//		}
-//	}
 
 	void Model::LoadTexture(const std::filesystem::path& path) {
 		auto texture = std::make_shared<Texture>(path.string());

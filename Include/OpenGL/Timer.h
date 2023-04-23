@@ -17,6 +17,7 @@ namespace Z {
 		static float GetFlushTime(){
 			return glfwGetTime() - lastFlush;
 		}
+		static float GetFPS();
 	};
 
 }

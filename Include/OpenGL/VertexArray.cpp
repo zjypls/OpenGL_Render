@@ -16,10 +16,10 @@ namespace Z {
 		}
 	}
 
-	VertexBuffer::VertexBuffer(const void *data, uint32_t size) {
+	VertexBuffer::VertexBuffer(const void *data, uint32_t size,uint32_t count):count(count){
 		glCreateBuffers(1, &id);
 		glBindBuffer(GL_ARRAY_BUFFER, id);
-		glBufferData(GL_ARRAY_BUFFER, size, data, GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, size*count, data, GL_STATIC_DRAW);
 	}
 
 	IndexBuffer::IndexBuffer(const uint32_t *data, uint32_t count) {
@@ -52,17 +52,20 @@ namespace Z {
 				                       (const void *) element.offset);
 			}
 			index++;
-			vertexBuffers.push_back(vb);
 		}
+		vertexBuffers.push_back(vb);
 	}
 
 	void VertexArray::Draw() const {
 		Bind();
+		if(indexBuffer)
 		glDrawElements(GL_TRIANGLES, indexBuffer->GetCount(), GL_UNSIGNED_INT, nullptr);
+		else
+		glDrawArrays(GL_TRIANGLES,0,vertexBuffers[0]->count);
 	}
 
-	void VertexArray::AddVertexBuffer(const float *data, uint32_t size, const BufferLayout &layout) {
-		auto vb = std::make_shared<VertexBuffer>(data, size);
+	void VertexArray::AddVertexBuffer(const float *data, uint32_t size,uint32_t count, const BufferLayout &layout) {
+		auto vb = std::make_shared<VertexBuffer>(data,count, size);
 		vb->SetLayout(layout);
 		AddVertexBuffer(vb);
 	}

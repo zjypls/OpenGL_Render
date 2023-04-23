@@ -32,14 +32,15 @@ namespace Z {
 	};
 	class VertexBuffer{
 	public:
-		VertexBuffer(const void* data, uint32_t size);
+		VertexBuffer(const void* data, uint32_t size,uint32_t count);
 		~VertexBuffer(){glDeleteBuffers(1,&id);}
 		void Bind() const{glBindBuffer(GL_ARRAY_BUFFER,id);}
 		void Unbind() const{glBindBuffer(GL_ARRAY_BUFFER,0);}
 		const BufferLayout& GetLayout() const { return layout; }
 		void SetLayout(const BufferLayout& bufferLayout) { layout = bufferLayout; }
 	private:
-		uint32_t id;
+		friend class VertexArray;
+		uint32_t id,count;
 		BufferLayout layout;
 	};
 
@@ -61,10 +62,10 @@ namespace Z {
 	public:
 		VertexArray();
 		VertexArray(std::shared_ptr<VertexBuffer>& vertexBuffer, const std::shared_ptr<IndexBuffer>& indexBuffer);
-		void Bind() const{glBindVertexArray(id);vertexBuffers[0]->Bind();indexBuffer->Bind();}
+		void Bind() const{glBindVertexArray(id);vertexBuffers[0]->Bind();if(indexBuffer)(indexBuffer->Bind());}
 		void Unbind() const{glBindVertexArray(0);}
 		void AddVertexBuffer(const std::shared_ptr<VertexBuffer>& vb);
-		void AddVertexBuffer(const float* data, uint32_t size, const BufferLayout& layout);
+		void AddVertexBuffer(const float* data, uint32_t size,uint32_t count, const BufferLayout& layout);
 		void SetIndexBuffer(const std::shared_ptr<IndexBuffer>& ib){indexBuffer = ib;}
 		void SetIndexBuffer(const uint32_t* data, uint32_t count);
 		const std::vector<std::shared_ptr<VertexBuffer>>& GetVertexBuffers() const { return vertexBuffers; }

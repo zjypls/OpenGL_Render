@@ -11,12 +11,12 @@ static Z::BufferLayout layout = {
 		Z::BufferLayout::Element{"Bitangent",GL_FLOAT,3,sizeof(float),false,sizeof(float)*11},
 		Z::BufferLayout::Element{"Index",GL_INT,2,sizeof(int),false,sizeof(float)*14}
 };
-ModelPBR::ModelPBR(const std::string &path, int index, const glm::vec3 &position) : Model(path, index, position) {
+ModelPBR::ModelPBR(const std::string &path, int index,bool loadTex, const glm::vec3 &position) : Model(path, index,loadTex, position) {
 	GenerateVertexArray();
 }
 
 void ModelPBR::GenerateVertexArray() {
-	auto vertexBuffer=std::make_shared<Z::VertexBuffer>(vertices.data(),vertices.size()*sizeof(Z::Model::Vertex));
+	auto vertexBuffer=std::make_shared<Z::VertexBuffer>(vertices.data(),sizeof(Z::Model::Vertex),vertices.size());
 	auto indexBuffer=std::make_shared<Z::IndexBuffer>(indices.data(),indices.size());
 	vertexBuffer->SetLayout(layout);
 	vertexArray=std::make_shared<Z::VertexArray>(vertexBuffer,indexBuffer);

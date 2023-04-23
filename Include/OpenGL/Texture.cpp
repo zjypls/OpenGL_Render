@@ -76,4 +76,16 @@ namespace Z {
 		glGetTextureLevelParameteriv(id,0,GL_TEXTURE_WIDTH,&width);
 		glGetTextureLevelParameteriv(id,0,GL_TEXTURE_HEIGHT,&height);
 	}
+
+	TextureBuffer::TextureBuffer(const void *data, size_t size, GLenum iFormat) {
+		glCreateBuffers(1,&id);
+		glNamedBufferStorage(id,size,data,GL_MAP_WRITE_BIT);
+		glCreateTextures(GL_TEXTURE_BUFFER,1,&tid);
+		glTextureBuffer(tid,iFormat,id);
+
+	}
+
+	void TextureBuffer::Bind(uint32_t slot) const {
+		glBindTextureUnit(slot,tid);
+	}
 }
