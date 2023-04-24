@@ -71,7 +71,7 @@ namespace Z {
 		const std::vector<std::shared_ptr<VertexBuffer>>& GetVertexBuffers() const { return vertexBuffers; }
 		const std::shared_ptr<IndexBuffer>& GetIndexBuffer() const { return indexBuffer; }
 
-		void Draw()const;
+		void Draw(GLenum elementsType=GL_TRIANGLES)const;
 
 	private:
 		uint32_t id;

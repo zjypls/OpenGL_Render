@@ -8,6 +8,7 @@
 #include "OpenGL/MyImGui.h"
 #include "OpenGL/Timer.h"
 #include "OpenGL/UniformBuffer.h"
+#include "OpenGL/Guizmo.h"
 
 struct CameraData {
 	glm::vec4 horizon, vertical, origin, direction;
@@ -17,10 +18,10 @@ struct CameraData {
 Z::Camera camera{{12, 2, 0}, {0, 0, 0}, 90, 800.0f / 600.0f, 0.1f, 100.0f, 1};
 glm::vec2 g_viewportSize{800, 600};
 World world{
-		{Sphere{{-.5, 1,  -1.7, 1},{.8,  .5, .3,   1}},
+		{Sphere{{-.5, 1,  -1.7, 1},{.8,  .5, .3,   1},{LAMBERT,0,0,1}},
 		Sphere{{-.8, 1,  1.3, 1},{.7,  .1, .8,  1},{MIRROR,   0,  0,   0}},
-		Sphere{{.8, .7, -.3, .7},{.9, .9, .9,  1},{FOG,  45, 0,   0}},
-		Sphere{{1.3, 1.5, .5, .5},{.9, .9, .9,  1},{GLASS,  50, 0,   0}},
+		Sphere{{.8, 1.2, -.3, .7},{.9, .9, .9,  1},{FOG,  40, 0,   0}},
+		Sphere{{1.3, 0.5, -1.1, .5},{.9, .9, .9,  1},{GLASS,  50, 0,   0}},
 		Sphere{{.8, 4.7, -.3, 1.2},{8., 13., 5.,  1},{LIGHT,  0, 0,   0}},
 		Sphere{{1.8, .48, .8, .5},{.7, .1, .9,  1},{META,  70, 20,   0}},
 		Sphere{{-1, -100, 0,  100},{.9, .9,.9, 1}}},
@@ -36,12 +37,12 @@ __declspec(dllexport) unsigned long NvOptimusEnablement = 0x00000001;
 int main() {
 	CameraData cameraData{glm::vec4{0, 0, -1, 0} * (g_viewportSize.x / 200.f),
 	                      glm::vec4{0, 1, 0, 0} * (g_viewportSize.y / 200.f),
-	                      {12, 2, 0, 0}, {-1, 0, 0, 20}, {10.f, 1, 800, 600}};
+	                      {20, 2, 0, 0}, {-1, 0, 0, 20}, {10.f, 1, 800, 600}};
 	Z::RenderSpec spec{};
 	spec.title = "Ray Tracing in One Weekend";
 	Z::Renderer::Init(spec);
 	Z::MyImGui::Init();
-	auto RayShader=Z::Shader::Create({"Common/Quad.vert", "RayTracingOneWeek/Tracing.frag"});
+	auto RayShader=Z::Shader::Create({"Common/Quad.vert", "RayTracingOneWeek/TracingTest.frag"});
 	RayShader->Bind();
 	RayShader->SetUniform("gamaMode", 0);
 
@@ -99,18 +100,10 @@ int main() {
 			camera.aspect = g_viewportSize.x / g_viewportSize.y;
 			cameraDataBuffer.SetData(&cameraData, sizeof(CameraData));
 		}
+
 		ImGui::End();
-		static float deltaTime = Z::Timer::GetDeltaTime() * 1000;
-		static float fps = 1 / deltaTime * 1000;
-		if (Z::Timer::GetFlushTime() > 1) {
-			deltaTime = Z::Timer::GetDeltaTime();
-			fps = 1 / deltaTime;
-			deltaTime *= 1000;
-			Z::Timer::Flush();
-		}
 		ImGui::Begin("Setting");
-		ImGui::Text("FPS: %.2f", fps);
-		ImGui::Text("Delta Time: %.3f ms", deltaTime);
+		ImGui::Text("FPS: %.2f", Z::Timer::GetFPS());
 		if (ImGui::SliderFloat("Distance", &cameraData.direction.w, .5, 20)) {
 			frameCount = 0;
 			cameraDataBuffer.SetData(&cameraData, sizeof(CameraData));

@@ -38,7 +38,6 @@ namespace Z {
 	void Camera::Turn(GLFWwindow *window, double x, double y) {
 		float dx = x - lastX;
 		float dy = y - lastY;
-		//ToDo:change button 4 toRight
 		if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS) {
 			Front = focus - position;
 			Right = glm::normalize(glm::cross(Front, glm::vec3(0, 1, 0)));

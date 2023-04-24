@@ -27,7 +27,7 @@ namespace Z{
 	void Model::LoadModel(const std::string &path) {
 		//load model
 		Assimp::Importer importer;
-		auto scene = importer.ReadFile((modelRootPath/path).string(), aiProcess_Triangulate | aiProcess_FlipUVs);
+		auto scene = importer.ReadFile((modelRootPath/path).string(), aiProcess_Triangulate | aiProcess_FlipUVs|aiProcess_GenNormals);
 		if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
 			std::cout << "ERROR::ASSIMP::" << importer.GetErrorString() << std::endl;
 			return;

@@ -4,6 +4,7 @@
 
 //define TEST_TRIANGLES_DATA to test the triangles data for debugging
 //#define TEST_TRIANGLES_DATA
+
 #include <iostream>
 #include "OpenGL/Renderer.h"
 #include "OpenGL/MyImGui.h"
@@ -49,10 +50,8 @@ int main() {
 	#endif
 	auto beforeFrame = Z::FrameBuffer(attachmentsSpec);
 
-	auto model = std::make_shared<ModelBVH>("lighter/lighter.fbx");
+	auto model = std::make_shared<ModelBVH>("bunny/bunny.obj");
 	model->GenerateBVH(3);
-	auto RoomBase=Z::Texture{"../Model/lighter/Textures/base.png"};
-	RoomBase.Bind(2);
 
 	auto bvh = model->GetBVH();
 	auto bvhBuffer = Z::TextureBuffer(bvh.data(), bvh.size() * sizeof(BVH), GL_RGBA32F);
@@ -74,13 +73,16 @@ int main() {
 	vbTest->SetLayout({{"",GL_FLOAT,4,sizeof(float)},{"",GL_FLOAT,4,sizeof(float)},{"",GL_FLOAT,4,sizeof(float)}});
 	auto vaTest=Z::VertexArray{};
 	vaTest.AddVertexBuffer(vbTest);
+
+//debug for BVH
+//	auto vaTest=model->GetBVHVisualizeVAO();
+//	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 #else
 	auto Quad = Z::Renderer::GetQuadVertexArray();
 	auto TracingShader = Z::Shader::Create({"Common/Quad.vert", "TracingBVH/Tracing.frag"});
 	TracingShader->Bind();
 	TracingShader->SetUniform("nums", triangles.size());
 #endif
-
 	while (Z::Renderer::Running()) {
 		Z::Timer::Update();
 		Z::MyImGui::Begin();
@@ -94,6 +96,7 @@ int main() {
 
 		#ifdef TEST_TRIANGLES_DATA
 		testShader->Bind();
+//		vaTest.second->Bind();
 		auto vp=camera.GetVPMatrix();
 		testShader->SetUniform("vp",&vp[0][0]);
 		vaTest.Draw();

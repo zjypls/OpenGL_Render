@@ -49,7 +49,6 @@ bool rayTriangleIntersect(vec3 origin, vec3 direction, Triangle triangle, inout 
     return true;
 }
 
-
 vec4 GetColor(Ray ray){
     int stack[64];
     int StackIndex=0;
@@ -72,9 +71,12 @@ vec4 GetColor(Ray ray){
                     VertexA(texelFetch(Triangles, index*9+3), texelFetch(Triangles, index*9+4), texelFetch(Triangles, index*9+5)),
                     VertexA(texelFetch(Triangles, index*9+6), texelFetch(Triangles, index*9+7), texelFetch(Triangles, index*9+8)));
                     if (rayTriangleIntersect(ray.origin, ray.direction, triangle, t, u, v)){
-                        Color= texture(base,triangle.v0.texCoord.rg*(1-u-v)
-                        +triangle.v1.texCoord.rg*u
-                        +triangle.v2.texCoord.rg*v);
+//                        Color= texture(base,triangle.v0.texCoord.rg*(1-u-v)
+//                        +triangle.v1.texCoord.rg*u
+//                        +triangle.v2.texCoord.rg*v);
+                        Color= triangle.v1.normal*u
+                        +triangle.v2.normal*v
+                        +triangle.v0.normal*(1-u-v);
                     }
                 }
             }else{

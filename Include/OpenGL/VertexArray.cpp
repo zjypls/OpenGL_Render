@@ -56,12 +56,12 @@ namespace Z {
 		vertexBuffers.push_back(vb);
 	}
 
-	void VertexArray::Draw() const {
+	void VertexArray::Draw(GLenum type) const {
 		Bind();
 		if(indexBuffer)
-		glDrawElements(GL_TRIANGLES, indexBuffer->GetCount(), GL_UNSIGNED_INT, nullptr);
+		glDrawElements(type, indexBuffer->GetCount(), GL_UNSIGNED_INT, nullptr);
 		else
-		glDrawArrays(GL_TRIANGLES,0,vertexBuffers[0]->count);
+		glDrawArrays(type,0,vertexBuffers[0]->count);
 	}
 
 	void VertexArray::AddVertexBuffer(const float *data, uint32_t size,uint32_t count, const BufferLayout &layout) {

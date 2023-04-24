@@ -182,10 +182,10 @@ vec4 GetColor(Ray ray){
 }
 void main() {
 
-    if (control.y>700){
-        color=texture(otherFrame, texcoord);
-        return;
-    }
+//    if (control.y>700){
+//        color=texture(otherFrame, texcoord);
+//        return;
+//    }
 
     vec2 dsize=1.f/control.zw;
     vec4 temp=vec4(0, 0, 0, 0);
