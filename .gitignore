@@ -11,3 +11,5 @@ cmake-build-debug
 cmake-build-release
 Bin/imgui.ini
 *.ini
+src/Test/*
+.gitignore
