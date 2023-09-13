@@ -15,7 +15,7 @@
 extern "C"
 {
 __declspec(dllexport) unsigned long NvOptimusEnablement = 0x00000001;
-//__declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
+__declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
 }
 Z::Camera camera{
 		{1.5, -1.3, .6},
@@ -161,21 +161,14 @@ int main() {
 		ImGui::End();
 
 		ImGui::Begin("Status");
-		static float frame = 1 / Z::Timer::GetDeltaTime();
-		if (Z::Timer::GetFlushTime() > 1.f) {
-			frame = 1 / Z::Timer::GetDeltaTime();
-			Z::Timer::Flush();
-		}
-		ImGui::Text("FPS: %.2f", frame);
+		ImGui::Text("FPS: %.2f", Z::Timer::GetFPS());
 		ImGui::Text("Index: %d, %d", ModelIndex.x, ModelIndex.y);
 		ImGui::Text("CursorPos: %.2f, %.2f", CursorPos.x, CursorPos.y);
 		ImGui::SliderFloat("Bloom Threshold", &lightData.cameraPos[3], .5f, 3.f);
 		ImGui::Combo("Light", &CurrentLightIndex, "Light0\0Light1\0Light2\0Light3\0Light4\0");
 		ImGui::DragFloat4("LightPos", &lightData.lightPos[CurrentLightIndex][0], .1f);
 		ImGui::DragFloat4("LightCol", &lightData.lightCol[CurrentLightIndex][0], .1f);
-		if(ImGui::Button("Screen Shot")){
-			postProcessFrame.ShotFrame("PBR_Shot.png");
-		}
+		if(ImGui::Button("Screen Shot")){postProcessFrame.ShotFrame("PBR_Shot.png");}
 		ImGui::Text("Right Mouse Button to rotate camera");
 		ImGui::Text("Middle Mouse Button to pick model and show guizmo");
 		ImGui::Text("Scroll to change focus distance");

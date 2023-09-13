@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.20)
 
 project(OpenGLLib)
 
-file(GLOB_RECURSE sources *.cpp *.h)
+file(GLOB sources *.cpp *.h)
 add_compile_definitions(Z_SHADER_PATH="${CMAKE_SOURCE_DIR}/Assets/Shaders/")
 add_compile_definitions(Z_TEXTURE_PATH="${CMAKE_SOURCE_DIR}/Assets/Textures/")
 add_library(OpenGLLib STATIC ${sources} ../ImGuizmo/ImGuizmo.cpp ../ImGuizmo/ImGuizmo.h)
