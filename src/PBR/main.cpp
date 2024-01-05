@@ -93,6 +93,7 @@ int main() {
 	static ImVec2 CursorPos{};
 	static glm::ivec2 ModelIndex{-1, -1};
 	static int CurrentLightIndex = 0;
+	bool needResize = false;
 	while (Z::Renderer::Running()) {
 		Z::Timer::Update();
 		Z::MyImGui::Begin();
@@ -142,15 +143,7 @@ int main() {
 		viewPortFocused = ImGui::IsWindowFocused();
 		auto viewSize = ImGui::GetWindowSize();
 		if (viewSize.x != g_viewportSize.x || viewSize.y != g_viewportSize.y) {
-			g_viewportSize = glm::vec2{viewSize.x, viewSize.y};
-			postProcessData.viewportSize = g_viewportSize;
-			attachmentsSpec.width = g_viewportSize.x;
-			attachmentsSpec.height = g_viewportSize.y;
-			LightViewFrame.Resize(g_viewportSize.x, g_viewportSize.y);
-			firstSampleFrame.Resize(g_viewportSize.x, g_viewportSize.y);
-			postProcessFrame.Resize(g_viewportSize.x, g_viewportSize.y);
-			camera.aspect = g_viewportSize.x / g_viewportSize.y;
-			camera.CalculateMatrix();
+			needResize = true;
 		}
 		if (ModelIndex.x != -1 && ModelIndex.y != -1 && ModelIndex.x < models.size()) {
 			Z::Guizmo::DrawGuizmo(camera.viewMatrix, camera.projectionMatrix, models[ModelIndex.x]->GetModelMatrix());
@@ -178,6 +171,17 @@ int main() {
 		Z::MyImGui::End();
 
 		Z::Renderer::SwapBuffers();
+		if (needResize) {
+			g_viewportSize = glm::vec2{ viewSize.x, viewSize.y };
+			postProcessData.viewportSize = g_viewportSize;
+			attachmentsSpec.width = g_viewportSize.x;
+			attachmentsSpec.height = g_viewportSize.y;
+			LightViewFrame.Resize(g_viewportSize.x, g_viewportSize.y);
+			firstSampleFrame.Resize(g_viewportSize.x, g_viewportSize.y);
+			postProcessFrame.Resize(g_viewportSize.x, g_viewportSize.y);
+			camera.aspect = g_viewportSize.x / g_viewportSize.y;
+			camera.CalculateMatrix();
+		}
 	}
 	if (walkControl.joinable())
 		walkControl.join();

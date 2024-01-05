@@ -59,6 +59,7 @@ int main() {
 	auto jupiter = std::make_shared<Z::Texture>("jupiter.jpg");
 	jupiter->Bind(1);
 	bool gamaCorrection = false;
+	bool needResize = false;
 	while (Z::Renderer::Running()) {
 		Z::Timer::Update();
 
@@ -86,19 +87,9 @@ int main() {
 		ImGui::Begin("##viewport", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoScrollbar);
 		ImGui::Image((void *) (frameCount % 2 ? beforeFrame.GetAttachment(0) : afterFrame.GetAttachment(0)),
 		             ImVec2(g_viewportSize.x, g_viewportSize.y), ImVec2(0, 1),ImVec2(1, 0));
-		if (auto viewSize = ImGui::GetWindowSize();viewSize.x != g_viewportSize.x || viewSize.y != g_viewportSize.y) {
-			frameCount = 0;
-			g_viewportSize = {viewSize.x, viewSize.y};
-			beforeFrame.Resize(g_viewportSize.x, g_viewportSize.y);
-			afterFrame.Resize(g_viewportSize.x, g_viewportSize.y);
-			cameraData.horizon = glm::vec4{0, 0, -1, 0} * g_viewportSize.x / 200.f;
-			cameraData.vertical = glm::vec4{0, 1, 0, 0} * g_viewportSize.y / 200.f;
-			cameraData.control.z = g_viewportSize.x;
-			cameraData.control.w = g_viewportSize.y;
-			camera.width = g_viewportSize.x;
-			camera.height = g_viewportSize.y;
-			camera.aspect = g_viewportSize.x / g_viewportSize.y;
-			cameraDataBuffer.SetData(&cameraData, sizeof(CameraData));
+		auto viewSize = ImGui::GetWindowSize();
+		if (viewSize.x != g_viewportSize.x || viewSize.y != g_viewportSize.y) {
+			needResize = true;
 		}
 
 		ImGui::End();
@@ -130,6 +121,21 @@ int main() {
 		Z::MyImGui::End();
 
 		Z::Renderer::SwapBuffers();
+		if (needResize) {
+			needResize = false;
+			frameCount = 0;
+			g_viewportSize = { viewSize.x, viewSize.y };
+			beforeFrame.Resize(g_viewportSize.x, g_viewportSize.y);
+			afterFrame.Resize(g_viewportSize.x, g_viewportSize.y);
+			cameraData.horizon = glm::vec4{ 0, 0, -1, 0 } *g_viewportSize.x / 200.f;
+			cameraData.vertical = glm::vec4{ 0, 1, 0, 0 } *g_viewportSize.y / 200.f;
+			cameraData.control.z = g_viewportSize.x;
+			cameraData.control.w = g_viewportSize.y;
+			camera.width = g_viewportSize.x;
+			camera.height = g_viewportSize.y;
+			camera.aspect = g_viewportSize.x / g_viewportSize.y;
+			cameraDataBuffer.SetData(&cameraData, sizeof(CameraData));
+		}
 		++frameCount;
 	}
 	Z::Renderer::Shutdown();
