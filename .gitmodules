@@ -1,6 +1,3 @@
-[submodule "Include/glfw"]
-	path = Include/glfw
-	url = https://github.com/zjypls/glfw.git
 [submodule "Include/glm"]
 	path = Include/glm
 	url = https://github.com/g-truc/glm.git
@@ -17,3 +14,6 @@
 [submodule "Include/ImGuizmo"]
 	path = Include/ImGuizmo
 	url = https://github.com/CedricGuillemet/ImGuizmo.git
+[submodule "Include/glfw"]
+	path = Include/glfw
+	url = https://github.com/zjypls/glfw
