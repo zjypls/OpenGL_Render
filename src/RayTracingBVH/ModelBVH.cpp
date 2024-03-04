@@ -5,7 +5,7 @@
 //the min thickness of the box,if less than this value,then add the SCALE_THICKNESS to it
 #define MIN_THICKNESS 1E-5
 #define SCALE_THICKNESS 5E-6
-
+#include <algorithm>
 #include "ModelBVH.h"
 
 int MinCount;

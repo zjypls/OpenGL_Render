@@ -1,5 +1,7 @@
 .idea
 *.exe
+Bin/*
+!Bin/*.ini
 *.pdb
 *.ilk
 *.lib
