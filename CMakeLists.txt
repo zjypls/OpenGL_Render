@@ -15,3 +15,4 @@ include_directories(${CMAKE_SOURCE_DIR}/Include
 add_subdirectory(Include)
 
 add_subdirectory(src)
+add_compile_definitions(-w)

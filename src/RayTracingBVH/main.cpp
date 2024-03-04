@@ -24,12 +24,24 @@ struct CameraData {
 };
 
 glm::vec2 g_ViewPortSize{800, 600};
+#ifdef Z_PLATFORM_WIN32
+	extern "C"
+	{
+	// http://developer.download.nvidia.com/devzone/devcenter/gamegraphics/files/OptimusRenderingPolicies.pdf
+	// The following line is to favor the high performance NVIDIA GPU if there are multiple GPUs
+	// Has to be .exe module to be correctly detected.
+	__declspec(dllexport) DWORD NvOptimusEnablement = 0x00000001;
+	}
+#endif
 
-extern "C"{
-	__declspec (dllexport) unsigned long NvOptimusEnablement = 0x00000001;
+void SetEnv(){
+#ifdef Z_PLATFORM_LINUX
+		putenv("__NV_PRIME_RENDER_OFFLOAD=1");
+		putenv("__GLX_VENDOR_LIBRARY_NAME=nvidia");
+#endif
 }
-
 int main() {
+	SetEnv();
 	CameraData cameraData{glm::vec4{0, 0, -1, 0} * (g_ViewPortSize.x / 200.f),
 	                      glm::vec4{0, 1, 0, 0} * (g_ViewPortSize.y / 200.f),
 	                      glm::vec4{1.5, .1, .4, 0}, glm::vec4{-1, 0, 0, 10}, glm::vec4{g_ViewPortSize, 0, 0}};

@@ -7,6 +7,8 @@
 #include "glad/glad/glad.h"
 
 namespace Z {
+	using uint64=unsigned long long;
+	using size_t=uint64;
 	class UniformBuffer {
 	public:
 		UniformBuffer();

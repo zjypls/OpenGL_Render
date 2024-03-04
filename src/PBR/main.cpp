@@ -11,11 +11,21 @@
 #include "ModelPBR.h"
 #include <thread>
 #include <iostream>
+#ifdef Z_PLATFORM_WIN32
+	extern "C"
+	{
+	// http://developer.download.nvidia.com/devzone/devcenter/gamegraphics/files/OptimusRenderingPolicies.pdf
+	// The following line is to favor the high performance NVIDIA GPU if there are multiple GPUs
+	// Has to be .exe module to be correctly detected.
+	__declspec(dllexport) DWORD NvOptimusEnablement = 0x00000001;
+	}
+#endif
 
-extern "C"
-{
-__declspec(dllexport) unsigned long NvOptimusEnablement = 0x00000001;
-__declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
+void SetEnv(){
+#ifdef Z_PLATFORM_LINUX
+		putenv("__NV_PRIME_RENDER_OFFLOAD=1");
+		putenv("__GLX_VENDOR_LIBRARY_NAME=nvidia");
+#endif
 }
 Z::Camera camera{
 		{1.5, -1.3, .6},
@@ -37,6 +47,7 @@ ImVec2 operator-(const ImVec2 &a, const ImVec2 &b) {
 }
 
 int main() {
+	SetEnv();
 	camera.Front = camera.focus - camera.position;
 	camera.Right = glm::normalize(glm::cross(camera.Front, glm::vec3(0, 1, 0)));
 	LightData lightData{
