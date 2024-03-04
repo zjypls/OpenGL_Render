@@ -68,7 +68,7 @@ int main() {
 	glfwSetScrollCallback(window, [](GLFWwindow *w, double x, double y) {
 		camera.Scroll(w, x, y);
 	});
-	Z::MyImGui::Init();
+	Z::MyImGui::Init("PBR.ini\0");
 
 	auto QuadArray = Z::Renderer::GetQuadVertexArray();
 	auto SamplerShader = Z::Shader::Create({"PBR/Sampler.vert", "PBR/Sampler.frag"});

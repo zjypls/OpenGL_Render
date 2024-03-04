@@ -53,7 +53,7 @@ int main() {
 	spec.title = "RayTracingBVH";
 
 	Z::Renderer::Init(spec);
-	Z::MyImGui::Init();
+	Z::MyImGui::Init("RayTracing.ini\0");
 
 	auto attachmentsSpec = Z::AttachmentSpec{};
 	attachmentsSpec.attachments.push_back({GL_RGBA8, GL_COLOR_ATTACHMENT0});

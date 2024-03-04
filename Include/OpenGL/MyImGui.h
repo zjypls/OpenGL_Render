@@ -4,11 +4,12 @@
 
 #ifndef RENDERER003_OGL_MYIMGUI_H
 #define RENDERER003_OGL_MYIMGUI_H
+#include <string>
 #include "imgui/imgui.h"
 namespace Z{
 class MyImGui {
 public:
-	static void Init();
+	static void Init(const char* iniPath);
 	static void Begin();
 	static void End();
 	static void Shutdown();

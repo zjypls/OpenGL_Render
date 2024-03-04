@@ -7,12 +7,13 @@
 #include "imgui/backends/imgui_impl_opengl3.h"
 #include "Renderer.h"
 
-void Z::MyImGui::Init() {
+void Z::MyImGui::Init(const char* iniPath) {
 	ImGui::CreateContext();
 	ImGuiIO& io = ImGui::GetIO(); (void)io;
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
 	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 	io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+	io.IniFilename=iniPath;
 	ImGui::StyleColorsDark();
 	ImGuiStyle& style = ImGui::GetStyle();
 	if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
