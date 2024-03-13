@@ -1,12 +1,15 @@
 //
 // Created by 32725 on 2023/4/16.
 //
-
+#include "glm/glm/gtx/quaternion.hpp"
 #include "Camera.h"
 #include "OpenGL/Timer.h"
 #include "glm/glm/gtc/matrix_transform.hpp"
+//#include "glm/gtx/quaternion.hpp"
 
 namespace Z {
+	constexpr glm::vec3 g_Up=glm::vec3(0,1,0);
+    constexpr float rotateScale=1E-2f;
 	void Camera::Walk(GLFWwindow *window) {
 		auto camera = (Camera *) glfwGetWindowUserPointer(window);
 		while (!glfwWindowShouldClose(window)) {
@@ -36,16 +39,14 @@ namespace Z {
 	}
 
 	void Camera::Turn(GLFWwindow *window, double x, double y) {
-		float dx = x - lastX;
-		float dy = y - lastY;
+		float dx = -(x - lastX)*rotateScale;
+		float dy = -(y - lastY)*rotateScale;
 		if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS) {
 			Front = focus - position;
-			Right = glm::normalize(glm::cross(Front, glm::vec3(0, 1, 0)));
-			glm::vec3 up = glm::cross(Right, Front);
-			glm::mat4 mat = glm::mat4(1);
-			mat = glm::rotate(mat, glm::radians(-dx), up);
-			mat = glm::rotate(mat, glm::radians(-dy), Right);
-			Front = glm::normalize(glm::vec3(mat * glm::vec4(Front, 1)));
+            auto rotation=glm::angleAxis(dx,g_Up)*glm::angleAxis(dy,Right);
+			Front = glm::normalize(rotation*Front);
+            Up=rotation*Up;
+            Right=glm::normalize(glm::cross(Front,Up));
 			position = focus - Front * distance;
 			CalculateMatrix();
 		}
@@ -68,7 +69,7 @@ namespace Z {
 
 	void Camera::CalculateMatrix() {
 		projectionMatrix = glm::perspective(glm::radians(fov), aspect, near, far);
-		viewMatrix = glm::lookAt(position, focus, glm::vec3(0, 1, 0));
+		viewMatrix = glm::lookAt(position, focus, Up);
 	}
 
 	void Camera::Scroll(GLFWwindow *, double x, double y) {
