@@ -8,11 +8,15 @@
 //#include "glm/gtx/quaternion.hpp"
 
 namespace Z {
-	constexpr glm::vec3 g_Up=glm::vec3(0,1,0);
     constexpr float rotateScale=1E-2f;
+	const glm::vec3 g_Up=glm::vec3(0,1,0);
 	void Camera::Walk(GLFWwindow *window) {
 		auto camera = (Camera *) glfwGetWindowUserPointer(window);
+		auto deltaTime=1E-4f,oldTime=0.f,currntTime=0.01f;
 		while (!glfwWindowShouldClose(window)) {
+			currntTime=glfwGetTime();
+			deltaTime=currntTime-oldTime;
+			oldTime=currntTime;
 			glm::vec3 vec{0, 0, 0};
 			if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
 				vec += camera->Front;
@@ -25,12 +29,12 @@ namespace Z {
 				vec += camera->Right;
 			}
 			if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
-				vec += glm::vec3(0, 1, 0);
+				vec += g_Up;
 			} else if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) {
-				vec += glm::vec3(0, -1, 0);
+				vec -= g_Up;
 			}
-			if (vec != glm::vec3(0, 0, 0)) {
-				vec *= Timer::GetDeltaTime() * 5E-4;
+			if (glm::length(vec)>0.1f) {
+				vec *= deltaTime;
 				camera->position += vec;
 				camera->focus += vec;
 				camera->CalculateMatrix();
@@ -39,13 +43,14 @@ namespace Z {
 	}
 
 	void Camera::Turn(GLFWwindow *window, double x, double y) {
-		float dx = -(x - lastX)*rotateScale;
-		float dy = -(y - lastY)*rotateScale;
+        auto dt=Z::Timer::deltaTime;
+		float dx = (lastX - x)*dt;
+		float dy = (lastY - y)*dt;
 		if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS) {
 			Front = focus - position;
             auto rotation=glm::angleAxis(dx,g_Up)*glm::angleAxis(dy,Right);
 			Front = glm::normalize(rotation*Front);
-            Up=rotation*Up;
+            Up=glm::normalize(rotation*Up);
             Right=glm::normalize(glm::cross(Front,Up));
 			position = focus - Front * distance;
 			CalculateMatrix();

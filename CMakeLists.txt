@@ -21,6 +21,7 @@ set(ASSIMP_WARNINGS_AS_ERRORS OFF)
 set(ASSIMP_BUILD_TESTS OFF)
 set(ASSIMP_INSTALL OFF)
 set(ASSIMP_NO_EXPORT ON)
+add_compile_definitions(GLM_ENABLE_EXPERIMENTAL)
 add_subdirectory(Include)
 
 add_subdirectory(src)

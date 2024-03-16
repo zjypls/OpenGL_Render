@@ -10,10 +10,10 @@
 namespace Z {
 	struct Camera {
 		glm::vec3 position,focus;
-		float fov,aspect,near,far,distance;
+		float fov=60,aspect=1,near=0.1,far=1000,distance=3;
 		double lastX,lastY;
 
-		glm::vec3 Right,Up=glm::vec3(0,1,0),Front=glm::vec3(-1,-1,-1);
+		glm::vec3 Right{-1,0,0},Up=glm::vec3(0,1,0),Front=glm::vec3(-1,-1,-1);
 		bool Resize=false;
 		unsigned int width=800,height=600;
 		glm::mat4 viewMatrix=glm::lookAt(position, focus, glm::vec3(0, 1, 0));
