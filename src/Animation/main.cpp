@@ -4,6 +4,8 @@
 #include <thread>
 #include <cstdlib>
 #include <iostream>
+#include "OpenGL/Renderer.h"
+#include "OpenGL/Timer.h"
 #ifdef Z_PLATFORM_WIN32
 extern "C"
 	{
