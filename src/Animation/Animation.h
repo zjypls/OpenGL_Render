@@ -100,7 +100,7 @@ namespace Z {
                 return node.GetBoneName()==name;
             });
             if(res==bones.end())return nullptr;
-            return res.base();
+            return &(*res);
         }
         inline float GetTickPerSec(){return ticksPerSec;}
         inline float GetDuration(){return duration;}
