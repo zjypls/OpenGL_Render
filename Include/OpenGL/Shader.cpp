@@ -66,6 +66,14 @@ namespace Z {
 			shader->AddShader(*srcIt,*typeIt);
 		}
 		shader->Link();
+        GLint success;
+        glGetProgramiv(shader->id, GL_LINK_STATUS, &success);
+        if (!success) {
+            GLchar infoLog[512];
+            glGetProgramInfoLog(shader->id, 512, NULL, infoLog);
+            std::cout << "ERROR::PROGRAM_LINKING_ERROR\n" << infoLog << std::endl;
+        	assert(false);
+        }
 		return shader;
 	}
 

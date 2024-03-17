@@ -49,7 +49,7 @@ ImVec2 operator-(const ImVec2 &a, const ImVec2 &b) {
 int main() {
 	SetEnv();
 	camera.Front = camera.focus - camera.position;
-	camera.Right = glm::normalize(glm::cross(camera.Front, glm::vec3(0, 1, 0)));
+	camera.Right = glm::normalize(glm::cross(camera.Front,camera.Up));
 	LightData lightData{
 			{1.5,             -1.3,              0.6,               1.5},
 			{{1,  1,  0,  0}, {-10, -10, 10, 0}, {-10, 10, -10, 0}, {-10, -10, 10, 0}, {10, -10, 10, 0}},

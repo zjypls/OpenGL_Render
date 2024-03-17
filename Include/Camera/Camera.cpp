@@ -5,10 +5,8 @@
 #include "Camera.h"
 #include "OpenGL/Timer.h"
 #include "glm/glm/gtc/matrix_transform.hpp"
-//#include "glm/gtx/quaternion.hpp"
 
 namespace Z {
-    constexpr float rotateScale=1E-2f;
 	const glm::vec3 g_Up=glm::vec3(0,1,0);
 	void Camera::Walk(GLFWwindow *window) {
 		auto camera = (Camera *) glfwGetWindowUserPointer(window);
